@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FridgeWise – Invite housemates</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#3D3533;text-decoration-color:#FF7F79;text-decoration-thickness:2px;text-underline-offset:3px}a:hover{color:#000000}
+:focus-visible{outline:3px solid #3D3533;outline-offset:3px}
+.fw-btn{transition:transform .12s ease, box-shadow .12s ease}
+.fw-btn:active{transform:translateY(4px);box-shadow:none !important}
+.fw-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (max-width: 900px){.fw-side{display:none !important}}
+</style>
+</helmet>
+<div style="position: relative; box-sizing: border-box; min-height: 100vh; padding: 24px; display: flex; flex-wrap: wrap; gap: 32px; background: #FFF9F0; font-family: 'Nunito', system-ui, sans-serif; color: #3D3533">
+  <div class="fw-side" aria-hidden="true" style="flex: 0 0 264px; display: flex">
+    <dc-import name="AppSidebar" active="kitchen" hint-size="264px,852px"></dc-import>
+  </div>
+  <div aria-hidden="true" style="flex: 999 1 560px; min-width: 0; max-width: 1080px; padding: 8px 8px 24px; display: flex; flex-direction: column; gap: 24px">
+    <dc-import name="KitchenBar" tab="members" sync="synced" hint-size="100%,150px"></dc-import>
+    <div style="height: 120px; border-radius: 24px; background: #FFFFFF"></div>
+    <div style="height: 420px; border-radius: 24px; background: #FFFFFF"></div>
+  </div>
+
+  <div style="position: absolute; inset: 0; background: rgba(61, 53, 51, 0.5); display: flex; align-items: center; justify-content: center; padding: 24px; box-sizing: border-box">
+    <div role="dialog" aria-modal="true" aria-labelledby="inv-h" style="position: relative; width: 100%; max-width: 560px; box-sizing: border-box; padding: 32px; border-radius: 28px; background: #FFFFFF; box-shadow: 0 32px 64px rgba(61, 53, 51, 0.3); display: flex; flex-direction: column; gap: 20px">
+      <a href="Members.dc.html" aria-label="Close" style="position: absolute; top: 16px; right: 16px; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #6B6663">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg>
+      </a>
+
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span aria-hidden="true" style="width: 56px; height: 56px; border-radius: 18px; background: #FFE28A; display: flex; align-items: center; justify-content: center">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3D3533" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6"></path><path d="M22 11h-6"></path></svg>
+        </span>
+        <h2 id="inv-h" style="margin: 8px 0 0; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 32px; line-height: 1.05; font-weight: 800">Invite housemates</h2>
+        <p style="margin: 0; font-size: 16px; line-height: 1.55; color: #6B6663">Send the link, or read out the code. Anyone who has it can join Room 4B kitchen until it expires.</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <label for="inv-link" style="font-size: 15px; font-weight: 800">Invite link</label>
+        <div style="display: flex; gap: 8px">
+          <input id="inv-link" type="text" readonly="" value="fridgewise.app/join/K7P2QX" style="flex-grow: 1; min-width: 0; height: 52px; box-sizing: border-box; padding: 0 16px; border: 1.5px solid #898582; border-radius: 16px; background: #FFF9F0; font-family: inherit; font-size: 15px; font-weight: 700; color: #3D3533">
+          <button type="button" class="fw-btn" style="display: flex; align-items: center; gap: 8px; height: 52px; padding: 0 20px; border: none; border-radius: 999px; background: #FF7F79; box-shadow: 0 4px 0 #D9524C; color: #3D3533; font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"></path></svg>
+            Copy
+          </button>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 12px">
+        <div style="flex-grow: 1; height: 2px; border-radius: 2px; background: #EFE7DE"></div>
+        <span style="font-size: 14px; font-weight: 700; color: #6B6663">or share the code</span>
+        <div style="flex-grow: 1; height: 2px; border-radius: 2px; background: #EFE7DE"></div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <p role="text" aria-label="Invite code K 7 P 2 Q X" style="margin: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px">
+          <span aria-hidden="true" style="height: 64px; border-radius: 16px; background: #FFF9F0; border: 1.5px solid #EFE7DE; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 32px; font-weight: 800; display: flex; align-items: center; justify-content: center">K</span>
+          <span aria-hidden="true" style="height: 64px; border-radius: 16px; background: #FFF9F0; border: 1.5px solid #EFE7DE; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 32px; font-weight: 800; display: flex; align-items: center; justify-content: center">7</span>
+          <span aria-hidden="true" style="height: 64px; border-radius: 16px; background: #FFF9F0; border: 1.5px solid #EFE7DE; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 32px; font-weight: 800; display: flex; align-items: center; justify-content: center">P</span>
+          <span aria-hidden="true" style="height: 64px; border-radius: 16px; background: #FFF9F0; border: 1.5px solid #EFE7DE; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 32px; font-weight: 800; display: flex; align-items: center; justify-content: center">2</span>
+          <span aria-hidden="true" style="height: 64px; border-radius: 16px; background: #FFF9F0; border: 1.5px solid #EFE7DE; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 32px; font-weight: 800; display: flex; align-items: center; justify-content: center">Q</span>
+          <span aria-hidden="true" style="height: 64px; border-radius: 16px; background: #FFF9F0; border: 1.5px solid #EFE7DE; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 32px; font-weight: 800; display: flex; align-items: center; justify-content: center">X</span>
+        </p>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+          <span style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: #6B6663">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+            Expires in 47 h 58 min
+          </span>
+          <button type="button" style="display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 16px; border-radius: 999px; background: #FFFFFF; border: 1.5px solid #898582; color: #3D3533; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 4v5h-5"></path></svg>
+            New code
+          </button>
+        </div>
+        <span style="font-size: 13px; color: #6B6663">A new code turns the old one off. You can make up to [N] new codes an hour.</span>
+      </div>
+
+      <fieldset style="margin: 0; padding: 16px; border: none; border-radius: 20px; background: #FFF9F0; display: flex; flex-direction: column; gap: 10px">
+        <legend style="float: left; padding: 0; font-size: 15px; font-weight: 800">Who can invite people?</legend>
+        <div style="clear: both; display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #F3ECE4">
+          <label style="flex: 1; height: 44px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 2px 6px rgba(61,53,51,0.12); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; cursor: pointer">
+            <input type="radio" name="who" checked="" class="fw-sr">Only me
+          </label>
+          <label style="flex: 1; height: 44px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; cursor: pointer">
+            <input type="radio" name="who" class="fw-sr">Any member
+          </label>
+        </div>
+        <span style="font-size: 13px; color: #6B6663">Only you see this setting because you're the owner.</span>
+      </fieldset>
+
+      <a href="Members.dc.html" class="fw-btn" style="align-self: flex-end; display: flex; align-items: center; height: 52px; padding: 0 32px; box-sizing: border-box; border-radius: 999px; background: #FFFFFF; border: 1.5px solid #898582; box-shadow: 0 4px 0 #E3DCD3; font-size: 16px; font-weight: 800; text-decoration: none">Done</a>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

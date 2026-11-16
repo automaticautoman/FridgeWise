@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FridgeWise – Join a kitchen</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#3D3533;text-decoration-color:#FF7F79;text-decoration-thickness:2px;text-underline-offset:3px}a:hover{color:#000000}
+:focus-visible{outline:3px solid #3D3533;outline-offset:3px}
+.fw-btn{transition:transform .12s ease, box-shadow .12s ease}
+.fw-btn:active{transform:translateY(4px);box-shadow:none !important}
+.fw-code:focus{border-color:#3D3533 !important;box-shadow:0 0 0 4px #FFE3E1;outline:none}
+@media (max-width: 900px){.fw-side{display:none !important}}
+</style>
+</helmet>
+<div style="box-sizing: border-box; min-height: 100vh; padding: 24px; display: flex; flex-wrap: wrap; gap: 32px; background: #FFF9F0; font-family: 'Nunito', system-ui, sans-serif; color: #3D3533">
+  <div class="fw-side" style="flex: 0 0 264px; display: flex">
+    <dc-import name="AppSidebar" active="kitchen" user-name="Zain Ahmed" initials="ZA" kitchen-label="No kitchen yet" avatar-bg="#A8DDB5" hint-size="264px,852px"></dc-import>
+  </div>
+
+  <main style="flex: 999 1 560px; min-width: 0; max-width: 1080px; padding: 16px 8px 24px; display: flex; align-items: center; justify-content: center">
+    <div style="width: 100%; max-width: 560px; box-sizing: border-box; padding: 40px; border-radius: 28px; background: #FFFFFF; box-shadow: 0 12px 32px rgba(61, 53, 51, 0.06); display: flex; flex-direction: column; gap: 24px">
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span aria-hidden="true" style="width: 64px; height: 64px; border-radius: 20px; background: #A8DDB5; display: flex; align-items: center; justify-content: center">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#3D3533" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><path d="M10 17l5-5-5-5"></path><path d="M15 12H3"></path></svg>
+        </span>
+        <h1 style="margin: 12px 0 0; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 40px; line-height: 1.05; font-weight: 800; letter-spacing: -0.5px">Join a kitchen</h1>
+        <p style="margin: 0; font-size: 16px; line-height: 1.55; color: #6B6663">Got an invite link? Just open it. Or type the 6-character code a housemate sent you.</p>
+      </div>
+
+      <fieldset style="margin: 0; padding: 0; border: none; display: flex; flex-direction: column; gap: 10px">
+        <legend style="padding: 0; margin-bottom: 10px; font-size: 15px; font-weight: 800">Invite code</legend>
+        <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px">
+          <input class="fw-code" aria-label="Character 1" maxlength="1" value="K" style="min-width: 0; height: 64px; box-sizing: border-box; border: 1.5px solid #898582; border-radius: 16px; background: #FFFFFF; text-align: center; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 30px; font-weight: 800; color: #3D3533; text-transform: uppercase">
+          <input class="fw-code" aria-label="Character 2" maxlength="1" value="7" style="min-width: 0; height: 64px; box-sizing: border-box; border: 1.5px solid #898582; border-radius: 16px; background: #FFFFFF; text-align: center; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 30px; font-weight: 800; color: #3D3533; text-transform: uppercase">
+          <input class="fw-code" aria-label="Character 3" maxlength="1" value="P" style="min-width: 0; height: 64px; box-sizing: border-box; border: 1.5px solid #898582; border-radius: 16px; background: #FFFFFF; text-align: center; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 30px; font-weight: 800; color: #3D3533; text-transform: uppercase">
+          <input class="fw-code" aria-label="Character 4" maxlength="1" value="2" style="min-width: 0; height: 64px; box-sizing: border-box; border: 1.5px solid #898582; border-radius: 16px; background: #FFFFFF; text-align: center; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 30px; font-weight: 800; color: #3D3533; text-transform: uppercase">
+          <input class="fw-code" aria-label="Character 5" maxlength="1" value="Q" style="min-width: 0; height: 64px; box-sizing: border-box; border: 1.5px solid #898582; border-radius: 16px; background: #FFFFFF; text-align: center; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 30px; font-weight: 800; color: #3D3533; text-transform: uppercase">
+          <input class="fw-code" aria-label="Character 6" maxlength="1" value="X" style="min-width: 0; height: 64px; box-sizing: border-box; border: 1.5px solid #898582; border-radius: 16px; background: #FFFFFF; text-align: center; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 30px; font-weight: 800; color: #3D3533; text-transform: uppercase">
+        </div>
+      </fieldset>
+
+      <div role="status" style="padding: 18px; border-radius: 20px; background: #EAF7EE; border: 1.5px solid #A8DDB5; display: flex; flex-direction: column; gap: 14px">
+        <span style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 800; color: #1F5E37">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+          Found it! Is this the right kitchen?
+        </span>
+        <div style="display: flex; align-items: center; gap: 14px">
+          <span aria-hidden="true" style="width: 52px; height: 52px; border-radius: 16px; background: #A9D8F0; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#3D3533" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="3"></rect><path d="M5 10h14"></path><path d="M9 5v2"></path><path d="M9 13v3"></path></svg></span>
+          <span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px">
+            <span style="font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 22px; font-weight: 800; line-height: 1.1">Room 4B kitchen</span>
+            <span style="font-size: 14px; font-weight: 700; color: #3F5A47">Shared · 4 members · Owner: Sara Khan</span>
+          </span>
+          <span aria-hidden="true" style="display: flex">
+            <span style="width: 32px; height: 32px; border-radius: 50%; background: #FFE28A; border: 2px solid #EAF7EE; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center">SK</span>
+            <span style="width: 32px; height: 32px; margin-left: -8px; border-radius: 50%; background: #A9D8F0; border: 2px solid #EAF7EE; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center">AR</span>
+            <span style="width: 32px; height: 32px; margin-left: -8px; border-radius: 50%; background: #C9B9F2; border: 2px solid #EAF7EE; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center">MH</span>
+          </span>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <a href="Main.dc.html" class="fw-btn" style="display: flex; align-items: center; justify-content: center; gap: 8px; height: 56px; border-radius: 999px; background: #FF7F79; box-shadow: 0 4px 0 #D9524C; font-size: 17px; font-weight: 800; text-decoration: none">Join Room 4B kitchen</a>
+        <a href="JoinError.dc.html" style="align-self: center; padding: 8px; font-size: 15px; font-weight: 800">Not the right kitchen? Change the code</a>
+      </div>
+
+      <p style="margin: 0; display: flex; gap: 10px; padding: 14px; border-radius: 16px; background: #FFF9F0; font-size: 14px; line-height: 1.5; color: #6B6663">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5"></path><path d="M12 8h.01"></path></svg>
+        Codes stop working after 48 hours. If yours doesn't work, ask whoever invited you for a new one.
+      </p>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

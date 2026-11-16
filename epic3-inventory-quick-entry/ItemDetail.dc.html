@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FridgeWise – Item detail</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#3D3533;text-decoration-color:#FF7F79;text-decoration-thickness:2px;text-underline-offset:3px}a:hover{color:#000000}
+:focus-visible{outline:3px solid #3D3533;outline-offset:3px}
+.fw-btn{transition:transform .12s ease, box-shadow .12s ease}
+.fw-btn:active{transform:translateY(4px);box-shadow:none !important}
+.fw-step:hover{background:#F3ECE4 !important}
+@media (max-width: 900px){.fw-side{display:none !important}}
+</style>
+</helmet>
+<div style="box-sizing: border-box; min-height: 100vh; padding: 24px; display: flex; flex-wrap: wrap; gap: 32px; background: #FFF9F0; font-family: 'Nunito', system-ui, sans-serif; color: #3D3533">
+  <div class="fw-side" style="flex: 0 0 264px; display: flex">
+    <dc-import name="AppSidebar" active="kitchen" hint-size="264px,852px"></dc-import>
+  </div>
+
+  <main style="flex: 999 1 560px; min-width: 0; max-width: 1080px; padding: 16px 8px 24px; display: flex; flex-direction: column">
+    <a href="Main.dc.html" style="align-self: flex-start; display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 12px 0 4px; font-size: 15px; font-weight: 800; text-decoration: none">
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+      Home
+    </a>
+
+    <div style="margin-top: 8px; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+      <div style="display: flex; align-items: center; gap: 16px">
+        <span aria-hidden="true" style="width: 72px; height: 72px; border-radius: 22px; background: #A9D8F0; display: flex; align-items: center; justify-content: center">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#3D3533" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2h8v3l2 3v14H6V8l2-3z"></path><path d="M6 12h12"></path></svg>
+        </span>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <h1 style="margin: 0; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 44px; line-height: 1; font-weight: 800">Milk</h1>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px">
+            <span style="height: 28px; padding: 0 10px; border-radius: 999px; background: #E3F3FB; font-size: 13px; font-weight: 800; display: flex; align-items: center">Fridge</span>
+            <span style="height: 28px; padding: 0 10px; border-radius: 999px; background: #F3ECE4; font-size: 13px; font-weight: 800; display: flex; align-items: center">Dairy</span>
+            <span style="display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 6px; border-radius: 999px; background: #E3F3FB; font-size: 13px; font-weight: 800">
+              <span aria-hidden="true" style="width: 16px; height: 16px; border-radius: 50%; background: #FFFFFF; font-size: 9px; display: flex; align-items: center; justify-content: center">S</span>
+              Shared
+            </span>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px">
+        <a href="ItemForm.dc.html" style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px 0 12px; border-radius: 999px; background: #FFFFFF; border: 1.5px solid #898582; font-size: 14px; font-weight: 800; text-decoration: none">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>
+          Edit
+        </a>
+        <button type="button" style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px 0 12px; border-radius: 999px; background: #FFFFFF; border: 1.5px solid #D9D2CB; color: #8E2C26; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path></svg>
+          Delete (added by mistake)
+        </button>
+      </div>
+    </div>
+
+    <div style="margin-top: 28px; display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+      <section aria-labelledby="b-h" style="flex: 1 1 420px; min-width: 0; box-sizing: border-box; padding: 28px; border-radius: 24px; background: #FFFFFF; box-shadow: 0 12px 32px rgba(61, 53, 51, 0.06); display: flex; flex-direction: column; gap: 16px">
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 12px">
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 14px; font-weight: 700; color: #6B6663">In total</span>
+            <span style="font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 40px; line-height: 1; font-weight: 800">2 L</span>
+          </div>
+          <span style="height: 32px; padding: 0 12px; border-radius: 999px; background: #FFE3E1; color: #8E2C26; font-size: 14px; font-weight: 800; display: flex; align-items: center">Earliest expires today</span>
+        </div>
+
+        <h2 id="b-h" style="margin: 8px 0 0; font-size: 13px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; color: #6B6663">2 batches</h2>
+
+        <div style="display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 18px; background: #FFF4F3">
+          <span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 16px; font-weight: 800">Bought 9 Nov</span>
+            <span style="font-size: 13px; color: #6B6663">Added by Maryam · <strong style="color: #8E2C26">Use by today</strong></span>
+          </span>
+          <div role="group" aria-label="Batch 1 amount" style="display: flex; align-items: center; gap: 4px; padding: 3px; border-radius: 999px; background: #FFFFFF; border: 1.5px solid #D9D2CB">
+            <button type="button" class="fw-step" aria-label="Less" style="width: 40px; height: 40px; border: none; border-radius: 50%; background: transparent; color: #3D3533; font-size: 22px; font-weight: 800; cursor: pointer">−</button>
+            <input aria-label="Amount" value="1" style="width: 44px; height: 40px; border: none; text-align: center; font-family: inherit; font-size: 16px; font-weight: 800; color: #3D3533; background: transparent">
+            <span style="font-size: 14px; font-weight: 700; color: #6B6663; padding-right: 4px">L</span>
+            <button type="button" class="fw-step" aria-label="More" style="width: 40px; height: 40px; border: none; border-radius: 50%; background: transparent; color: #3D3533; font-size: 22px; font-weight: 800; cursor: pointer">+</button>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 18px; background: #FFF9F0">
+          <span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 16px; font-weight: 800">Bought 11 Nov</span>
+            <span style="font-size: 13px; color: #6B6663">Added by Ali · Use by 15 Nov</span>
+          </span>
+          <div role="group" aria-label="Batch 2 amount" style="display: flex; align-items: center; gap: 4px; padding: 3px; border-radius: 999px; background: #FFFFFF; border: 1.5px solid #D9D2CB">
+            <button type="button" class="fw-step" aria-label="Less" style="width: 40px; height: 40px; border: none; border-radius: 50%; background: transparent; color: #3D3533; font-size: 22px; font-weight: 800; cursor: pointer">−</button>
+            <input aria-label="Amount" value="1" style="width: 44px; height: 40px; border: none; text-align: center; font-family: inherit; font-size: 16px; font-weight: 800; color: #3D3533; background: transparent">
+            <span style="font-size: 14px; font-weight: 700; color: #6B6663; padding-right: 4px">L</span>
+            <button type="button" class="fw-step" aria-label="More" style="width: 40px; height: 40px; border: none; border-radius: 50%; background: transparent; color: #3D3533; font-size: 22px; font-weight: 800; cursor: pointer">+</button>
+          </div>
+        </div>
+        <a href="ItemForm.dc.html" style="display: flex; align-items: center; justify-content: center; gap: 8px; height: 52px; border-radius: 18px; border: 1.5px dashed #898582; font-size: 15px; font-weight: 800; text-decoration: none">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+          Add another batch
+        </a>
+      </section>
+
+      <section aria-labelledby="use-h" style="flex: 1 1 320px; min-width: 0; max-width: 420px; box-sizing: border-box; padding: 28px; border-radius: 24px; background: #FFFFFF; box-shadow: 0 12px 32px rgba(61, 53, 51, 0.06); display: flex; flex-direction: column; gap: 18px">
+        <h2 id="use-h" style="margin: 0; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 26px; font-weight: 800">Take some out</h2>
+        <div role="radiogroup" aria-label="What happened to it?" style="display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #F3ECE4">
+          <sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+            <button type="button" role="radio" aria-checked="{{m.sel}}" onClick="{{m.pick}}" style="flex: 1; height: 44px; border: none; border-radius: 999px; background: {{m.bg}}; box-shadow: {{m.sh}}; color: #3D3533; font-family: inherit; font-size: 14px; font-weight: {{m.fw}}; cursor: pointer">{{m.label}}</button>
+          </sc-for>
+        </div>
+        <span style="font-size: 14px; color: #6B6663">{{modeHint}}</span>
+
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <span style="font-size: 15px; font-weight: 800">How much?</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px">
+            <sc-for list="{{amounts}}" as="a" hint-placeholder-count="3">
+              <button type="button" aria-pressed="{{a.sel}}" onClick="{{a.pick}}" style="height: 44px; padding: 0 16px; border-radius: 999px; border: 1.5px solid {{a.border}}; background: {{a.bg}}; color: {{a.fg}}; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer">{{a.label}}</button>
+            </sc-for>
+          </div>
+          <span style="font-size: 13px; color: #6B6663">Taken from the batch that expires first.</span>
+        </div>
+
+        <button type="button" class="fw-btn" style="height: 54px; border: none; border-radius: 999px; background: #FF7F79; box-shadow: 0 4px 0 #D9524C; color: #3D3533; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer">{{cta}}</button>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const st = this.state || {};
+    const mode = st.mode || 'used';
+    const amt = st.amt || 'half';
+    const modeList = [['used', 'Used'], ['wasted', 'Wasted'], ['removed', 'Removed']];
+    const hints = {
+      used: 'You ate or cooked with it.',
+      wasted: 'It went off or got thrown out. Goes into the waste log.',
+      removed: 'It left the kitchen some other way, like given away.'
+    };
+    const amtList = [['quarter', '250 ml'], ['half', '500 ml'], ['batch', '1 L (one batch)'], ['all', 'All 2 L']];
+    const amtLabel = { quarter: '250 ml', half: '500 ml', batch: '1 L', all: '2 L' }[amt];
+    const verb = { used: 'used', wasted: 'wasted', removed: 'removed' }[mode];
+    return {
+      modes: modeList.map(([id, label]) => {
+        const on = id === mode;
+        return { label, sel: on ? 'true' : 'false', bg: on ? '#FFFFFF' : 'transparent', sh: on ? '0 2px 6px rgba(61,53,51,0.12)' : 'none', fw: on ? '800' : '700', pick: () => this.setState({ mode: id }) };
+      }),
+      amounts: amtList.map(([id, label]) => {
+        const on = id === amt;
+        return { label, sel: on ? 'true' : 'false', bg: on ? '#3D3533' : '#FFFFFF', fg: on ? '#FFFFFF' : '#3D3533', border: on ? '#3D3533' : '#898582', pick: () => this.setState({ amt: id }) };
+      }),
+      modeHint: hints[mode],
+      cta: 'Mark ' + amtLabel + ' as ' + verb
+    };
+  }
+}
+</script>
+</body>
+</html>

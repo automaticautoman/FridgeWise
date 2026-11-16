@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FridgeWise – Recently removed</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#3D3533;text-decoration-color:#FF7F79;text-decoration-thickness:2px;text-underline-offset:3px}a:hover{color:#000000}
+:focus-visible{outline:3px solid #3D3533;outline-offset:3px}
+.fw-btn{transition:transform .12s ease, box-shadow .12s ease}
+.fw-btn:active{transform:translateY(4px);box-shadow:none !important}
+@media (max-width: 900px){.fw-side{display:none !important}}
+</style>
+</helmet>
+<div style="box-sizing: border-box; min-height: 100vh; padding: 24px; display: flex; flex-wrap: wrap; gap: 32px; background: #FFF9F0; font-family: 'Nunito', system-ui, sans-serif; color: #3D3533">
+  <div class="fw-side" style="flex: 0 0 264px; display: flex">
+    <dc-import name="AppSidebar" active="kitchen" hint-size="264px,852px"></dc-import>
+  </div>
+
+  <main style="flex: 999 1 560px; min-width: 0; max-width: 860px; padding: 16px 8px 24px; display: flex; flex-direction: column">
+    <a href="Main.dc.html" style="align-self: flex-start; display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 12px 0 4px; font-size: 15px; font-weight: 800; text-decoration: none">
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+      Home
+    </a>
+    <h1 style="margin: 8px 0 0; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 44px; line-height: 1.05; font-weight: 800; letter-spacing: -0.5px">Recently removed</h1>
+    <p style="margin: 8px 0 0; font-size: 17px; line-height: 1.55; color: #6B6663">Took something out by mistake? Put it back. Items stay here for 30 days.</p>
+
+    <ul style="margin: 28px 0 0; padding: 12px; list-style: none; border-radius: 24px; background: #FFFFFF; box-shadow: 0 12px 32px rgba(61, 53, 51, 0.06); display: flex; flex-direction: column; gap: 4px">
+      <sc-for list="{{rows}}" as="r" hint-placeholder-count="5">
+        <li style="display: flex; align-items: center; gap: 14px; padding: 12px; border-radius: 18px; background: {{r.rowBg}}">
+          <span style="flex: 1 1 220px; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 16px; font-weight: 800">{{r.name}}</span>
+            <span style="font-size: 13px; color: #6B6663">{{r.by}} · {{r.when}} · {{r.loc}}</span>
+          </span>
+          <span style="flex-shrink: 0; height: 28px; padding: 0 12px; border-radius: 999px; background: {{r.tagBg}}; color: {{r.tagFg}}; font-size: 12px; font-weight: 800; display: flex; align-items: center">{{r.tag}}</span>
+          <span style="flex-shrink: 0; width: 92px; font-size: 13px; font-weight: 700; color: #6B6663; text-align: right">{{r.left}}</span>
+          <sc-if value="{{r.restored}}" hint-placeholder-val="{{false}}">
+            <span role="status" style="flex-shrink: 0; width: 130px; display: flex; align-items: center; justify-content: center; gap: 6px; height: 44px; font-size: 14px; font-weight: 800; color: #1F5E37">
+              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+              Back in {{r.loc}}
+            </span>
+          </sc-if>
+          <sc-if value="{{r.notRestored}}" hint-placeholder-val="{{true}}">
+            <button type="button" onClick="{{r.restore}}" aria-label="Restore {{r.name}}" class="fw-btn" style="flex-shrink: 0; width: 130px; display: flex; align-items: center; justify-content: center; gap: 6px; height: 44px; border-radius: 999px; background: #FFFFFF; border: 1.5px solid #898582; box-shadow: 0 3px 0 #E3DCD3; color: #3D3533; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path></svg>
+              Restore
+            </button>
+          </sc-if>
+        </li>
+      </sc-for>
+    </ul>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const restored = (this.state && this.state.restored) || {};
+    const tags = {
+      used: { tag: 'Used', tagBg: '#D6F0DC', tagFg: '#1F5E37' },
+      wasted: { tag: 'Wasted', tagBg: '#FFE3E1', tagFg: '#8E2C26' },
+      removed: { tag: 'Removed', tagBg: '#F3ECE4', tagFg: '#5E5552' }
+    };
+    const data = [
+      { id: 1, name: 'Spinach, 1 bunch', by: 'Ali', when: 'yesterday', loc: 'Fridge', t: 'wasted', left: '29 days left' },
+      { id: 2, name: 'Yoghurt, 500 g', by: 'Maryam', when: '2 days ago', loc: 'Fridge', t: 'used', left: '28 days left' },
+      { id: 3, name: 'Tomatoes, 6', by: 'You', when: '5 days ago', loc: 'Fridge', t: 'used', left: '25 days left' },
+      { id: 4, name: 'Paneer, 200 g', by: 'You', when: '12 days ago', loc: 'Fridge', t: 'removed', left: '18 days left' },
+      { id: 5, name: 'Bananas, 6', by: 'Zain', when: '26 days ago', loc: 'Cupboard', t: 'wasted', left: '4 days left' }
+    ];
+    const rows = data.map((d) => {
+      const r = !!restored[d.id];
+      return Object.assign({}, d, tags[d.t], {
+        restored: r,
+        notRestored: !r,
+        rowBg: r ? '#EAF7EE' : 'transparent',
+        restore: () => this.setState({ restored: Object.assign({}, restored, { [d.id]: true }) })
+      });
+    });
+    return { rows };
+  }
+}
+</script>
+</body>
+</html>

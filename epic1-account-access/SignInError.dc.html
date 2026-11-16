@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FridgeWise – Sign in, wrong details</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#3D3533;text-decoration-color:#FF7F79;text-decoration-thickness:2px;text-underline-offset:3px}a:hover{color:#000000}
+:focus-visible{outline:3px solid #3D3533;outline-offset:3px}
+.fw-btn{transition:transform .12s ease, box-shadow .12s ease}
+.fw-btn:active{transform:translateY(4px);box-shadow:none !important}
+.fw-input:focus{border-color:#3D3533 !important;box-shadow:0 0 0 4px #FFE3E1;outline:none}
+@media (max-width: 900px){.fw-aside{display:none !important}}
+</style>
+</helmet>
+<div style="box-sizing: border-box; min-height: 100vh; padding: 24px; display: flex; flex-wrap: wrap; gap: 24px; background: #FFF9F0; font-family: 'Nunito', system-ui, sans-serif; color: #3D3533">
+  <main style="flex: 1 1 480px; min-width: 0; display: flex; flex-direction: column; padding: 8px clamp(0px, 3vw, 40px)">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <span style="width: 44px; height: 44px; border-radius: 14px; background: #FF7F79; box-shadow: 0 3px 0 #D9524C; display: flex; align-items: center; justify-content: center">
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3D3533" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"></rect><path d="M6 10h12"></path><path d="M9.5 5v2"></path><path d="M9.5 13v3"></path></svg>
+      </span>
+      <span style="font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 28px; font-weight: 800; line-height: 1">FridgeWise</span>
+    </div>
+
+    <div style="flex-grow: 1; display: flex; align-items: center; padding: 24px 0">
+      <div style="width: 100%; max-width: 420px; margin: 0 auto; display: flex; flex-direction: column">
+        <h1 style="margin: 0; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 44px; line-height: 1.05; font-weight: 800; letter-spacing: -0.5px">Welcome back, Chef!</h1>
+        <p style="margin: 8px 0 0; font-size: 17px; line-height: 1.55; color: #6B6663">Sign in to see what's fresh in your kitchen.</p>
+
+        <button type="button" class="fw-btn" style="margin-top: 28px; display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; height: 56px; box-sizing: border-box; border-radius: 999px; background: #FFFFFF; border: 1.5px solid #898582; box-shadow: 0 4px 0 #E3DCD3; color: #3D3533; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer">
+          <span aria-hidden="true" style="width: 24px; height: 24px; box-sizing: border-box; border: 1.5px dashed #898582; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #6B6663">G</span>
+          Continue with Google
+        </button>
+
+        <div style="margin-top: 22px; display: flex; align-items: center; gap: 12px">
+          <div style="flex-grow: 1; height: 2px; border-radius: 2px; background: #EFE7DE"></div>
+          <span style="font-size: 14px; font-weight: 700; color: #6B6663">or sign in with email</span>
+          <div style="flex-grow: 1; height: 2px; border-radius: 2px; background: #EFE7DE"></div>
+        </div>
+
+        <form style="margin: 22px 0 0; display: flex; flex-direction: column; gap: 16px">
+          <div id="signin-error" role="alert" style="display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 18px; background: #FFE3E1; color: #3D3533; font-size: 15px; line-height: 1.45">
+            <span style="flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: #FF7F79; display: flex; align-items: center; justify-content: center">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3D3533" stroke-width="3" stroke-linecap="round"><path d="M12 6v8"></path><path d="M12 18v.01"></path></svg>
+            </span>
+            <span><span style="font-weight: 800">Hmm, that email and password don't match.</span> Check them and try again, or <a href="ForgotPassword.dc.html" style="font-weight: 800">reset your password</a>.</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <label for="email" style="font-size: 15px; font-weight: 800">Email</label>
+            <input id="email" class="fw-input" type="email" autocomplete="email" aria-invalid="true" aria-describedby="signin-error" value="sara@example.com" style="width: 100%; height: 56px; box-sizing: border-box; padding: 0 20px; border: 2px solid #B23A33; border-radius: 18px; background: #FFFFFF; font-family: inherit; font-size: 16px; color: #3D3533">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <div style="display: flex; align-items: center; justify-content: space-between">
+              <label for="password" style="font-size: 15px; font-weight: 800">Password</label>
+              <a href="ForgotPassword.dc.html" style="font-size: 14px; font-weight: 800; padding: 4px 0">Forgot password?</a>
+            </div>
+            <div style="position: relative">
+              <input id="password" class="fw-input" type="password" autocomplete="current-password" aria-invalid="true" aria-describedby="signin-error" value="kitchen12" style="width: 100%; height: 56px; box-sizing: border-box; padding: 0 60px 0 20px; border: 2px solid #B23A33; border-radius: 18px; background: #FFFFFF; font-family: inherit; font-size: 16px; color: #3D3533">
+              <button type="button" aria-label="Show password" style="position: absolute; right: 6px; top: 6px; width: 44px; height: 44px; border: none; background: transparent; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #6B6663; cursor: pointer">
+                <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
+          </div>
+          <button type="submit" class="fw-btn" style="margin-top: 8px; width: 100%; height: 56px; border: none; border-radius: 999px; background: #FF7F79; box-shadow: 0 4px 0 #D9524C; color: #3D3533; font-family: inherit; font-size: 17px; font-weight: 800; cursor: pointer">Try again</button>
+        </form>
+
+        <p style="margin: 24px 0 0; text-align: center; font-size: 15px; color: #6B6663">New to FridgeWise? <a href="SignUp.dc.html" style="font-weight: 800">Create an account</a></p>
+      </div>
+    </div>
+  </main>
+
+  <aside class="fw-aside" style="flex: 1 1 520px; min-width: 0; display: flex">
+    <dc-import name="BrandPanel" variant="signin" hint-size="100%,852px"></dc-import>
+  </aside>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

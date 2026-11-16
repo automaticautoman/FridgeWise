@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FridgeWise – Kitchen activity</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#3D3533;text-decoration-color:#FF7F79;text-decoration-thickness:2px;text-underline-offset:3px}a:hover{color:#000000}
+:focus-visible{outline:3px solid #3D3533;outline-offset:3px}
+@media (max-width: 900px){.fw-side{display:none !important}}
+</style>
+</helmet>
+<div style="box-sizing: border-box; min-height: 100vh; padding: 24px; display: flex; flex-wrap: wrap; gap: 32px; background: #FFF9F0; font-family: 'Nunito', system-ui, sans-serif; color: #3D3533">
+  <div class="fw-side" style="flex: 0 0 264px; display: flex">
+    <dc-import name="AppSidebar" active="kitchen" hint-size="264px,852px"></dc-import>
+  </div>
+
+  <main style="flex: 999 1 560px; min-width: 0; max-width: 1080px; padding: 8px 8px 24px; display: flex; flex-direction: column">
+    <dc-import name="KitchenBar" tab="activity" sync="syncing" hint-size="100%,150px"></dc-import>
+
+    <div style="margin-top: 28px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+      <h1 style="margin: 0; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 36px; line-height: 1.1; font-weight: 800">What's been happening</h1>
+      <div role="group" aria-label="Filter activity" style="display: flex; flex-wrap: wrap; gap: 8px">
+        <sc-for list="{{filters}}" as="f" hint-placeholder-count="5">
+          <button type="button" aria-pressed="{{f.pressed}}" onClick="{{f.pick}}" style="height: 44px; padding: 0 18px; border-radius: 999px; border: 1.5px solid {{f.border}}; background: {{f.bg}}; color: {{f.fg}}; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer">{{f.label}}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <section aria-label="Activity" style="margin-top: 20px; padding: 12px 24px 20px; border-radius: 24px; background: #FFFFFF; box-shadow: 0 12px 32px rgba(61, 53, 51, 0.06); display: flex; flex-direction: column">
+      <sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
+        <h2 style="margin: 16px 0 6px; font-size: 13px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; color: #6B6663">{{g.day}}</h2>
+        <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column">
+          <sc-for list="{{g.items}}" as="e" hint-placeholder-count="3">
+            <li style="display: flex; align-items: center; gap: 14px; padding: 12px 0; border-top: 1.5px solid #F3ECE4">
+              <span aria-hidden="true" style="flex-shrink: 0; width: 42px; height: 42px; border-radius: 50%; background: {{e.avatarBg}}; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center">{{e.initials}}</span>
+              <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                <span style="font-size: 15px; line-height: 1.4"><strong>{{e.who}}</strong> {{e.verb}} <strong>{{e.item}}</strong></span>
+                <span style="font-size: 13px; color: #6B6663">{{e.where}} · {{e.when}}</span>
+              </span>
+              <span style="flex-shrink: 0; height: 28px; padding: 0 12px; border-radius: 999px; background: {{e.badgeBg}}; color: {{e.badgeFg}}; font-size: 12px; font-weight: 800; display: flex; align-items: center">{{e.badge}}</span>
+            </li>
+          </sc-for>
+        </ul>
+      </sc-for>
+      <sc-if value="{{empty}}" hint-placeholder-val="{{false}}">
+        <p style="margin: 24px 0 8px; text-align: center; font-size: 15px; color: #6B6663">Nothing like that yet.</p>
+      </sc-if>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const active = (this.state && this.state.filter) || 'all';
+    const types = {
+      added: { badge: 'Added', badgeBg: '#D6F0DC', badgeFg: '#1F5E37' },
+      edited: { badge: 'Edited', badgeBg: '#E3F3FB', badgeFg: '#1D5470' },
+      used: { badge: 'Used up', badgeBg: '#FFF3C4', badgeFg: '#5C4300' },
+      removed: { badge: 'Removed', badgeBg: '#FFE3E1', badgeFg: '#8E2C26' }
+    };
+    const people = {
+      Ali: { initials: 'AR', avatarBg: '#A9D8F0' },
+      Maryam: { initials: 'MH', avatarBg: '#C9B9F2' },
+      You: { initials: 'SK', avatarBg: '#FFE28A' },
+      Zain: { initials: 'ZA', avatarBg: '#A8DDB5' }
+    };
+    const raw = [
+      { day: 'Today', who: 'Ali', type: 'added', verb: 'added', item: 'Eggs, 12', where: 'Fridge', when: '2 min ago' },
+      { day: 'Today', who: 'Zain', type: 'added', verb: 'added', item: 'Bread', where: 'Cupboard', when: '1 h ago' },
+      { day: 'Today', who: 'Maryam', type: 'used', verb: 'used up', item: 'Yoghurt, 500 g', where: 'Fridge', when: '3 h ago' },
+      { day: 'Today', who: 'You', type: 'edited', verb: 'changed the expiry of', item: 'Chicken, 1 kg', where: 'Fridge', when: '5 h ago' },
+      { day: 'Yesterday', who: 'Ali', type: 'removed', verb: 'threw out', item: 'Spinach', where: 'Fridge', when: '9:40 pm' },
+      { day: 'Yesterday', who: 'You', type: 'added', verb: 'added', item: 'Basmati rice, 5 kg', where: 'Pantry', when: '6:15 pm' },
+      { day: 'Yesterday', who: 'Maryam', type: 'edited', verb: 'moved', item: 'Butter', where: 'Pantry → Fridge', when: '11:02 am' }
+    ];
+    const shown = raw.filter((e) => active === 'all' || e.type === active)
+      .map((e) => Object.assign({}, e, types[e.type], people[e.who]));
+    const days = [];
+    shown.forEach((e) => {
+      let g = days.find((d) => d.day === e.day);
+      if (!g) { g = { day: e.day, items: [] }; days.push(g); }
+      g.items.push(e);
+    });
+    const labels = [['all', 'All'], ['added', 'Added'], ['edited', 'Edited'], ['used', 'Used up'], ['removed', 'Removed']];
+    const filters = labels.map(([id, label]) => {
+      const on = id === active;
+      return {
+        label,
+        pressed: on ? 'true' : 'false',
+        bg: on ? '#3D3533' : '#FFFFFF',
+        fg: on ? '#FFFFFF' : '#3D3533',
+        border: on ? '#3D3533' : '#898582',
+        pick: () => this.setState({ filter: id })
+      };
+    });
+    return { filters, groups: days, empty: shown.length === 0 };
+  }
+}
+</script>
+</body>
+</html>

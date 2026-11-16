@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FridgeWise – Create kitchen</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#3D3533;text-decoration-color:#FF7F79;text-decoration-thickness:2px;text-underline-offset:3px}a:hover{color:#000000}
+:focus-visible{outline:3px solid #3D3533;outline-offset:3px}
+.fw-btn{transition:transform .12s ease, box-shadow .12s ease}
+.fw-btn:active{transform:translateY(4px);box-shadow:none !important}
+.fw-input:focus{border-color:#3D3533 !important;box-shadow:0 0 0 4px #FFE3E1;outline:none}
+.fw-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (max-width: 900px){.fw-side{display:none !important}}
+</style>
+</helmet>
+<div style="box-sizing: border-box; min-height: 100vh; padding: 24px; display: flex; flex-wrap: wrap; gap: 32px; background: #FFF9F0; font-family: 'Nunito', system-ui, sans-serif; color: #3D3533">
+  <div class="fw-side" style="flex: 0 0 264px; display: flex">
+    <dc-import name="AppSidebar" active="kitchen" hint-size="264px,852px"></dc-import>
+  </div>
+
+  <main style="flex: 999 1 560px; min-width: 0; max-width: 1080px; padding: 16px 8px 24px; display: flex; flex-direction: column; align-items: center">
+    <div style="width: 100%; max-width: 520px; display: flex; flex-direction: column">
+      <a href="Main.dc.html" style="align-self: flex-start; display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 12px 0 4px; font-size: 15px; font-weight: 800; text-decoration: none">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+        My Kitchen
+      </a>
+
+      <form style="margin-top: 12px; box-sizing: border-box; padding: 36px; border-radius: 28px; background: #FFFFFF; box-shadow: 0 12px 32px rgba(61, 53, 51, 0.06); display: flex; flex-direction: column; gap: 28px">
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <h1 style="margin: 0; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 38px; line-height: 1.05; font-weight: 800; letter-spacing: -0.5px">New kitchen</h1>
+          <p style="margin: 0; font-size: 16px; color: #6B6663">Three quick things and you're in.</p>
+        </div>
+
+        <fieldset style="margin: 0; padding: 0; border: none; display: flex; flex-direction: column; gap: 10px">
+          <legend style="padding: 0; margin-bottom: 10px; font-size: 15px; font-weight: 800">Who's it for?</legend>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+            <label onClick="{{pickShared}}" style="display: flex; align-items: center; gap: 12px; height: 64px; padding: 0 14px; box-sizing: border-box; border-radius: 18px; border: {{shared.border}}; background: {{shared.bg}}; cursor: pointer">
+              <input type="radio" name="kind" value="shared" checked="{{shared.on}}" class="fw-sr">
+              <span aria-hidden="true" style="width: 40px; height: 40px; border-radius: 12px; background: #A9D8F0; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3D3533" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
+              <span style="font-size: 16px; font-weight: 800">Housemates</span>
+            </label>
+            <label onClick="{{pickPrivate}}" style="display: flex; align-items: center; gap: 12px; height: 64px; padding: 0 14px; box-sizing: border-box; border-radius: 18px; border: {{private.border}}; background: {{private.bg}}; cursor: pointer">
+              <input type="radio" name="kind" value="private" checked="{{private.on}}" class="fw-sr">
+              <span aria-hidden="true" style="width: 40px; height: 40px; border-radius: 12px; background: #FFE28A; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3D3533" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path><path d="M10 21v-6h4v6"></path></svg></span>
+              <span style="font-size: 16px; font-weight: 800">My home</span>
+            </label>
+          </div>
+          <span style="font-size: 14px; color: #6B6663">{{kindHint}}</span>
+        </fieldset>
+
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <label for="kname" style="font-size: 15px; font-weight: 800">Name it</label>
+          <input id="kname" class="fw-input" type="text" value="Room 4B kitchen" style="width: 100%; height: 56px; box-sizing: border-box; padding: 0 20px; border: 1.5px solid #898582; border-radius: 18px; background: #FFFFFF; font-family: inherit; font-size: 16px; color: #3D3533">
+        </div>
+
+        <fieldset style="margin: 0; padding: 0; border: none; display: flex; flex-direction: column; gap: 10px">
+          <legend style="padding: 0; margin-bottom: 10px; font-size: 15px; font-weight: 800">Storage spots</legend>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px">
+            <label style="display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 16px 0 12px; border-radius: 999px; background: #D6F0DC; font-size: 15px; font-weight: 800; cursor: pointer">
+              <input type="checkbox" checked="" class="fw-sr">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2F7A4A" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+              Fridge
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 16px 0 12px; border-radius: 999px; background: #D6F0DC; font-size: 15px; font-weight: 800; cursor: pointer">
+              <input type="checkbox" checked="" class="fw-sr">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2F7A4A" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+              Pantry
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 16px 0 12px; border-radius: 999px; background: #D6F0DC; font-size: 15px; font-weight: 800; cursor: pointer">
+              <input type="checkbox" checked="" class="fw-sr">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2F7A4A" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+              Cupboard
+            </label>
+            <button type="button" aria-label="Add a storage spot" style="display: flex; align-items: center; gap: 4px; height: 44px; padding: 0 14px 0 10px; border-radius: 999px; background: transparent; border: 1.5px dashed #898582; color: #3D3533; font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+              Add
+            </button>
+          </div>
+        </fieldset>
+
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <a href="Invite.dc.html" class="fw-btn" style="display: flex; align-items: center; justify-content: center; height: 56px; border-radius: 999px; background: #FF7F79; box-shadow: 0 4px 0 #D9524C; font-size: 17px; font-weight: 800; text-decoration: none">Create kitchen</a>
+          <span style="text-align: center; font-size: 14px; color: #6B6663">You'll be the owner. You can change all of this later.</span>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const kind = (this.state && this.state.kind) || 'shared';
+    const style = (on) => ({
+      on,
+      border: on ? '2px solid #3D3533' : '1.5px solid #D9D2CB',
+      bg: on ? '#FFF4F3' : '#FFFFFF'
+    });
+    return {
+      shared: style(kind === 'shared'),
+      private: style(kind === 'private'),
+      kindHint: kind === 'shared'
+        ? 'A dorm or flat. You can invite people right after.'
+        : 'Your home kitchen. You can still invite family later.',
+      pickShared: () => this.setState({ kind: 'shared' }),
+      pickPrivate: () => this.setState({ kind: 'private' })
+    };
+  }
+}
+</script>
+</body>
+</html>

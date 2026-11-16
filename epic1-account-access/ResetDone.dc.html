@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FridgeWise – Password updated</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#3D3533;text-decoration-color:#FF7F79;text-decoration-thickness:2px;text-underline-offset:3px}a:hover{color:#000000}
+:focus-visible{outline:3px solid #3D3533;outline-offset:3px}
+.fw-btn{transition:transform .12s ease, box-shadow .12s ease}
+.fw-btn:active{transform:translateY(4px);box-shadow:none !important}
+@media (max-width: 900px){.fw-aside{display:none !important}}
+</style>
+</helmet>
+<div style="box-sizing: border-box; min-height: 100vh; padding: 24px; display: flex; flex-wrap: wrap; gap: 24px; background: #FFF9F0; font-family: 'Nunito', system-ui, sans-serif; color: #3D3533">
+  <main style="flex: 1 1 480px; min-width: 0; display: flex; flex-direction: column; padding: 8px clamp(0px, 3vw, 40px)">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <span style="width: 44px; height: 44px; border-radius: 14px; background: #FF7F79; box-shadow: 0 3px 0 #D9524C; display: flex; align-items: center; justify-content: center">
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3D3533" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"></rect><path d="M6 10h12"></path><path d="M9.5 5v2"></path><path d="M9.5 13v3"></path></svg>
+      </span>
+      <span style="font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 28px; font-weight: 800; line-height: 1">FridgeWise</span>
+    </div>
+
+    <div style="flex-grow: 1; display: flex; align-items: center; padding: 32px 0">
+      <div style="width: 100%; max-width: 420px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; text-align: center">
+        <div aria-hidden="true" style="position: relative; width: 160px; height: 160px; display: flex; align-items: center; justify-content: center">
+          <span style="position: absolute; top: 8px; left: 18px; width: 14px; height: 14px; border-radius: 50%; background: #FFA552"></span>
+          <span style="position: absolute; top: 20px; right: 10px; width: 10px; height: 10px; border-radius: 50%; background: #C9B9F2"></span>
+          <span style="position: absolute; bottom: 14px; left: 6px; width: 10px; height: 10px; border-radius: 50%; background: #A9D8F0"></span>
+          <span style="position: absolute; bottom: 4px; right: 26px; width: 16px; height: 16px; border-radius: 50%; background: #FFE28A"></span>
+          <span style="position: absolute; top: 64px; right: -4px; width: 8px; height: 8px; border-radius: 50%; background: #FF7F79"></span>
+          <div style="width: 120px; height: 120px; border-radius: 50%; background: #D6F0DC; display: flex; align-items: center; justify-content: center">
+            <div style="width: 84px; height: 84px; border-radius: 50%; background: #A8DDB5; box-shadow: 0 4px 0 #7FC291; display: flex; align-items: center; justify-content: center">
+              <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#3D3533" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+            </div>
+          </div>
+        </div>
+
+        <h1 style="margin: 24px 0 0; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 44px; line-height: 1.05; font-weight: 800; letter-spacing: -0.5px">Password updated!</h1>
+        <p style="margin: 10px 0 0; font-size: 17px; line-height: 1.55; color: #6B6663">You're all set. Sign in with your new password to get back to your kitchen.</p>
+
+        <a href="Main.dc.html" class="fw-btn" style="margin-top: 32px; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 56px; border-radius: 999px; background: #FF7F79; box-shadow: 0 4px 0 #D9524C; color: #3D3533; font-size: 17px; font-weight: 800; text-decoration: none">
+          Back to sign in
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <aside class="fw-aside" style="flex: 1 1 520px; min-width: 0; display: flex">
+    <dc-import name="BrandPanel" variant="done" hint-size="100%,852px"></dc-import>
+  </aside>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

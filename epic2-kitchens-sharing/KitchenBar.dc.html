@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FridgeWise – Kitchen bar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="box-sizing: border-box; width: 100%; display: flex; flex-direction: column; gap: 16px; font-family: 'Nunito', system-ui, sans-serif; color: #3D3533">
+  <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
+    <button type="button" aria-haspopup="listbox" aria-expanded="{{expandedAttr}}" aria-label="Switch kitchen. Current: Room 4B kitchen" style="display: flex; align-items: center; gap: 12px; height: 64px; padding: 0 16px 0 10px; border-radius: 20px; background: #FFFFFF; border: 1.5px solid {{switcherBorder}}; box-shadow: 0 4px 0 #E3DCD3; color: #3D3533; font-family: inherit; cursor: pointer">
+      <span aria-hidden="true" style="width: 44px; height: 44px; border-radius: 14px; background: #A9D8F0; display: flex; align-items: center; justify-content: center">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3D3533" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="3"></rect><path d="M5 10h14"></path><path d="M9 5v2"></path><path d="M9 13v3"></path></svg>
+      </span>
+      <span style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px">
+        <span style="font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 20px; font-weight: 800; line-height: 1.1">Room 4B kitchen</span>
+        <span style="font-size: 13px; font-weight: 700; color: #6B6663">Shared · 4 members</span>
+      </span>
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3D3533" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 6px; transform: {{chevron}}"><path d="M6 9l6 6 6-6"></path></svg>
+    </button>
+
+    <div style="flex-grow: 1"></div>
+
+    <span role="status" style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px 0 12px; border-radius: 999px; background: {{sync.bg}}; color: {{sync.fg}}; font-size: 14px; font-weight: 800">
+      <span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 50%; background: {{sync.dot}}"></span>
+      {{sync.label}}
+    </span>
+
+    <a href="Invite.dc.html" class="fw-btn" style="display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 22px 0 18px; border-radius: 999px; background: #FF7F79; box-shadow: 0 4px 0 #D9524C; color: #3D3533; font-size: 15px; font-weight: 800; text-decoration: none">
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6"></path><path d="M22 11h-6"></path></svg>
+      Invite
+    </a>
+  </div>
+
+  <nav aria-label="Kitchen sections" style="align-self: flex-start; display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #F3ECE4">
+    <a href="Main.dc.html" aria-current="{{cur.items}}" style="display: flex; align-items: center; height: 44px; padding: 0 20px; border-radius: 999px; background: {{bg.items}}; box-shadow: {{sh.items}}; color: #3D3533; font-size: 15px; font-weight: {{fw.items}}; text-decoration: none">Items</a>
+    <a href="Members.dc.html" aria-current="{{cur.members}}" style="display: flex; align-items: center; height: 44px; padding: 0 20px; border-radius: 999px; background: {{bg.members}}; box-shadow: {{sh.members}}; color: #3D3533; font-size: 15px; font-weight: {{fw.members}}; text-decoration: none">Members</a>
+    <a href="Activity.dc.html" aria-current="{{cur.activity}}" style="display: flex; align-items: center; height: 44px; padding: 0 20px; border-radius: 999px; background: {{bg.activity}}; box-shadow: {{sh.activity}}; color: #3D3533; font-size: 15px; font-weight: {{fw.activity}}; text-decoration: none">Activity</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"tab":{"editor":"enum","options":["items","members","activity"],"default":"items"},"sync":{"editor":"enum","options":["synced","syncing","offline"],"default":"synced"},"expanded":{"editor":"boolean","default":false},"$preview":{"width":1100,"height":150}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const tab = this.props.tab ?? 'items';
+    const keys = ['items', 'members', 'activity'];
+    const bg = {}, fw = {}, cur = {}, sh = {};
+    keys.forEach((k) => {
+      const on = k === tab;
+      bg[k] = on ? '#FFFFFF' : 'transparent';
+      fw[k] = on ? '800' : '700';
+      sh[k] = on ? '0 2px 6px rgba(61,53,51,0.12)' : 'none';
+      cur[k] = on ? 'page' : undefined;
+    });
+    const states = {
+      synced: { bg: '#D6F0DC', fg: '#1F5E37', dot: '#2F7A4A', label: 'All changes synced' },
+      syncing: { bg: '#FFF3C4', fg: '#5C4300', dot: '#B7791F', label: 'Syncing 2 changes…' },
+      offline: { bg: '#FFE3E1', fg: '#8E2C26', dot: '#B23A33', label: 'Offline · saved on this device' }
+    };
+    const expanded = !!this.props.expanded;
+    return {
+      bg, fw, cur, sh,
+      sync: states[this.props.sync] || states.synced,
+      expandedAttr: expanded ? 'true' : 'false',
+      chevron: expanded ? 'rotate(180deg)' : 'none',
+      switcherBorder: expanded ? '#3D3533' : '#898582'
+    };
+  }
+}
+</script>
+</body>
+</html>

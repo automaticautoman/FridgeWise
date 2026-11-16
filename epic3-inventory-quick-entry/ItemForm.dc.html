@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FridgeWise – Item details</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#3D3533;text-decoration-color:#FF7F79;text-decoration-thickness:2px;text-underline-offset:3px}a:hover{color:#000000}
+:focus-visible{outline:3px solid #3D3533;outline-offset:3px}
+.fw-btn{transition:transform .12s ease, box-shadow .12s ease}
+.fw-btn:active{transform:translateY(4px);box-shadow:none !important}
+.fw-input:focus{border-color:#3D3533 !important;box-shadow:0 0 0 4px #FFE3E1;outline:none}
+.fw-step:hover{background:#F3ECE4 !important}
+@media (max-width: 900px){.fw-side{display:none !important}}
+</style>
+</helmet>
+<div style="box-sizing: border-box; min-height: 100vh; padding: 24px; display: flex; flex-wrap: wrap; gap: 32px; background: #FFF9F0; font-family: 'Nunito', system-ui, sans-serif; color: #3D3533">
+  <div class="fw-side" style="flex: 0 0 264px; display: flex">
+    <dc-import name="AppSidebar" active="kitchen" hint-size="264px,852px"></dc-import>
+  </div>
+
+  <main style="flex: 999 1 560px; min-width: 0; max-width: 1080px; padding: 16px 8px 24px; display: flex; flex-direction: column; align-items: center">
+    <div style="width: 100%; max-width: 620px; display: flex; flex-direction: column">
+      <a href="AddItem.dc.html" style="align-self: flex-start; display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 12px 0 4px; font-size: 15px; font-weight: 800; text-decoration: none">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+        Back
+      </a>
+
+      <form style="margin-top: 12px; box-sizing: border-box; padding: 36px; border-radius: 28px; background: #FFFFFF; box-shadow: 0 12px 32px rgba(61, 53, 51, 0.06); display: flex; flex-direction: column; gap: 26px">
+        <h1 style="margin: 0; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 36px; line-height: 1.05; font-weight: 800; letter-spacing: -0.5px">Item details</h1>
+
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <label for="iname" style="font-size: 15px; font-weight: 800">Name <span style="color: #B23A33">*</span><span style="position: absolute; left: -9999px"> required</span></label>
+          <input id="iname" class="fw-input" type="text" required value="Basmati rice" style="width: 100%; height: 56px; box-sizing: border-box; padding: 0 20px; border: 1.5px solid #898582; border-radius: 18px; background: #FFFFFF; font-family: inherit; font-size: 16px; color: #3D3533">
+        </div>
+
+        <fieldset style="margin: 0; padding: 0; border: none; display: flex; flex-direction: column; gap: 12px">
+          <legend style="padding: 0; margin-bottom: 10px; font-size: 15px; font-weight: 800">How much is there?</legend>
+          <div role="radiogroup" aria-label="Track by" style="align-self: flex-start; display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #F3ECE4">
+            <sc-for list="{{modes}}" as="m" hint-placeholder-count="2">
+              <button type="button" role="radio" aria-checked="{{m.sel}}" onClick="{{m.pick}}" style="height: 40px; padding: 0 18px; border: none; border-radius: 999px; background: {{m.bg}}; box-shadow: {{m.sh}}; color: #3D3533; font-family: inherit; font-size: 14px; font-weight: {{m.fw}}; cursor: pointer">{{m.label}}</button>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{isAmount}}" hint-placeholder-val="{{true}}">
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
+              <div role="group" aria-label="Amount" style="display: flex; align-items: center; gap: 4px; padding: 4px; border-radius: 999px; background: #FFFFFF; border: 1.5px solid #898582">
+                <button type="button" class="fw-step" aria-label="Less" onClick="{{dec}}" style="width: 44px; height: 44px; border: none; border-radius: 50%; background: transparent; color: #3D3533; font-size: 24px; font-weight: 800; cursor: pointer">−</button>
+                <input aria-label="Amount" value="{{amount}}" inputmode="decimal" style="width: 72px; height: 44px; border: none; text-align: center; font-family: inherit; font-size: 18px; font-weight: 800; color: #3D3533; background: transparent">
+                <button type="button" class="fw-step" aria-label="More" onClick="{{inc}}" style="width: 44px; height: 44px; border: none; border-radius: 50%; background: transparent; color: #3D3533; font-size: 24px; font-weight: 800; cursor: pointer">+</button>
+              </div>
+              <div role="radiogroup" aria-label="Unit" style="display: flex; flex-wrap: wrap; gap: 6px">
+                <sc-for list="{{units}}" as="u" hint-placeholder-count="5">
+                  <button type="button" role="radio" aria-checked="{{u.sel}}" onClick="{{u.pick}}" style="min-width: 48px; height: 44px; padding: 0 12px; border-radius: 14px; border: 1.5px solid {{u.border}}; background: {{u.bg}}; color: {{u.fg}}; font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer">{{u.label}}</button>
+                </sc-for>
+              </div>
+            </div>
+            <sc-if value="{{showConv}}" hint-placeholder-val="{{true}}">
+              <span role="status" style="align-self: flex-start; display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px; background: #E3F3FB; color: #1D5470; font-size: 14px; font-weight: 800">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h11l-3-3"></path><path d="M17 17H6l3 3"></path></svg>
+                Saved as {{conv}}
+              </span>
+            </sc-if>
+          </sc-if>
+
+          <sc-if value="{{isLevel}}" hint-placeholder-val="{{false}}">
+            <div role="radiogroup" aria-label="Level" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+              <sc-for list="{{levels}}" as="l" hint-placeholder-count="3">
+                <button type="button" role="radio" aria-checked="{{l.sel}}" onClick="{{l.pick}}" style="height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border-radius: 18px; border: {{l.border}}; background: {{l.bg}}; color: #3D3533; font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer">
+                  <span aria-hidden="true" style="display: flex; gap: 3px">
+                    <span style="width: 16px; height: 10px; border-radius: 3px; background: {{l.b1}}"></span>
+                    <span style="width: 16px; height: 10px; border-radius: 3px; background: {{l.b2}}"></span>
+                    <span style="width: 16px; height: 10px; border-radius: 3px; background: {{l.b3}}"></span>
+                  </span>
+                  {{l.label}}
+                </button>
+              </sc-for>
+            </div>
+            <span style="font-size: 14px; color: #6B6663">Good for things you scoop out, like rice, flour or sugar.</span>
+          </sc-if>
+        </fieldset>
+
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <label for="exp" style="font-size: 15px; font-weight: 800">Expiry date</label>
+            <input id="exp" class="fw-input" type="date" value="2027-10-01" style="width: 100%; height: 52px; box-sizing: border-box; padding: 0 14px; border: 1.5px solid #898582; border-radius: 16px; background: #FFFFFF; font-family: inherit; font-size: 15px; color: #3D3533">
+            <span style="font-size: 13px; color: #6B6663">Suggested: keeps about a year. Leave empty if there's none.</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <label for="dtype" style="font-size: 15px; font-weight: 800">Date on the pack</label>
+            <select id="dtype" class="fw-input" style="width: 100%; height: 52px; box-sizing: border-box; padding: 0 14px; border: 1.5px solid #898582; border-radius: 16px; background: #FFFFFF; font-family: inherit; font-size: 15px; color: #3D3533">
+              <option>Best before</option>
+              <option>Use by</option>
+            </select>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <label for="cat" style="font-size: 15px; font-weight: 800">Category</label>
+            <select id="cat" class="fw-input" style="width: 100%; height: 52px; box-sizing: border-box; padding: 0 14px; border: 1.5px solid #898582; border-radius: 16px; background: #FFFFFF; font-family: inherit; font-size: 15px; color: #3D3533">
+              <option>Grains &amp; rice</option>
+              <option>Dairy</option>
+              <option>Vegetables</option>
+            </select>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <label for="loc" style="font-size: 15px; font-weight: 800">Where</label>
+            <select id="loc" class="fw-input" style="width: 100%; height: 52px; box-sizing: border-box; padding: 0 14px; border: 1.5px solid #898582; border-radius: 16px; background: #FFFFFF; font-family: inherit; font-size: 15px; color: #3D3533">
+              <option>Pantry</option>
+              <option>Fridge</option>
+              <option>Cupboard</option>
+            </select>
+          </div>
+        </div>
+
+        <fieldset style="margin: 0; padding: 0; border: none; display: flex; flex-direction: column; gap: 10px">
+          <legend style="padding: 0; margin-bottom: 10px; font-size: 15px; font-weight: 800">Whose is it?</legend>
+          <div role="radiogroup" aria-label="Owner" style="display: flex; flex-wrap: wrap; gap: 8px">
+            <sc-for list="{{owners}}" as="o" hint-placeholder-count="3">
+              <button type="button" role="radio" aria-checked="{{o.sel}}" onClick="{{o.pick}}" style="height: 44px; padding: 0 18px; border-radius: 999px; border: 1.5px solid {{o.border}}; background: {{o.bg}}; color: {{o.fg}}; font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer">{{o.label}}</button>
+            </sc-for>
+          </div>
+        </fieldset>
+
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <label for="note" style="font-size: 15px; font-weight: 800">Note <span style="font-weight: 600; color: #6B6663">(optional)</span></label>
+          <input id="note" class="fw-input" type="text" placeholder="e.g. for Friday's biryani" style="width: 100%; height: 52px; box-sizing: border-box; padding: 0 18px; border: 1.5px solid #898582; border-radius: 16px; background: #FFFFFF; font-family: inherit; font-size: 15px; color: #3D3533">
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px">
+          <a href="AddItem.dc.html" class="fw-btn" style="display: flex; align-items: center; height: 52px; padding: 0 26px; box-sizing: border-box; border-radius: 999px; background: #FFFFFF; border: 1.5px solid #898582; box-shadow: 0 4px 0 #E3DCD3; font-size: 16px; font-weight: 800; text-decoration: none">Cancel</a>
+          <a href="Main.dc.html" class="fw-btn" style="display: flex; align-items: center; height: 52px; padding: 0 32px; border-radius: 999px; background: #FF7F79; box-shadow: 0 4px 0 #D9524C; font-size: 16px; font-weight: 800; text-decoration: none">Save item</a>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1060}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const st = this.state || {};
+    const mode = st.mode || 'amount';
+    const unit = st.unit || 'g';
+    const amount = st.amount == null ? 1500 : st.amount;
+    const level = st.level || 'Half';
+    const owner = st.owner || 'Shared';
+    const stepFor = { g: 250, kg: 0.5, ml: 250, l: 0.5, pieces: 1 }[unit];
+    const seg = (on) => ({ bg: on ? '#FFFFFF' : 'transparent', sh: on ? '0 2px 6px rgba(61,53,51,0.12)' : 'none', fw: on ? '800' : '700' });
+    const pill = (on) => ({ bg: on ? '#3D3533' : '#FFFFFF', fg: on ? '#FFFFFF' : '#3D3533', border: on ? '#3D3533' : '#898582' });
+    let conv = '';
+    if (unit === 'g' && amount >= 1000) conv = (amount / 1000) + ' kg';
+    if (unit === 'ml' && amount >= 1000) conv = (amount / 1000) + ' l';
+    const fill = { Low: 1, Half: 2, Full: 3 };
+    return {
+      modes: [['amount', 'Amount'], ['level', 'Roughly (level)']].map(([id, label]) => Object.assign({ label, sel: id === mode ? 'true' : 'false', pick: () => this.setState({ mode: id }) }, seg(id === mode))),
+      isAmount: mode === 'amount',
+      isLevel: mode === 'level',
+      amount: String(amount),
+      dec: () => this.setState({ amount: Math.max(0, +(amount - stepFor).toFixed(2)) }),
+      inc: () => this.setState({ amount: +(amount + stepFor).toFixed(2) }),
+      units: ['g', 'kg', 'ml', 'l', 'pieces'].map((u) => Object.assign({ label: u, sel: u === unit ? 'true' : 'false', pick: () => this.setState({ unit: u, amount: { g: 500, kg: 1, ml: 500, l: 1, pieces: 1 }[u] }) }, pill(u === unit))),
+      showConv: !!conv,
+      conv,
+      levels: ['Low', 'Half', 'Full'].map((l) => {
+        const on = l === level;
+        const c = l === 'Low' ? '#D9524C' : '#3D3533';
+        return {
+          label: l, sel: on ? 'true' : 'false',
+          border: on ? '2px solid #3D3533' : '1.5px solid #D9D2CB', bg: on ? '#FFF4F3' : '#FFFFFF',
+          b1: fill[l] >= 1 ? c : '#E3DCD3', b2: fill[l] >= 2 ? c : '#E3DCD3', b3: fill[l] >= 3 ? c : '#E3DCD3',
+          pick: () => this.setState({ level: l })
+        };
+      }),
+      owners: ['Mine', 'Shared', 'Someone else…'].map((o) => Object.assign({ label: o, sel: o === owner ? 'true' : 'false', pick: () => this.setState({ owner: o }) }, pill(o === owner)))
+    };
+  }
+}
+</script>
+</body>
+</html>

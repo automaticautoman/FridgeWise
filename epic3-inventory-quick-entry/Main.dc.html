@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FridgeWise – Home</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#3D3533;text-decoration-color:#FF7F79;text-decoration-thickness:2px;text-underline-offset:3px}a:hover{color:#000000}
+:focus-visible{outline:3px solid #3D3533;outline-offset:3px}
+.fw-btn{transition:transform .12s ease, box-shadow .12s ease}
+.fw-btn:active{transform:translateY(4px);box-shadow:none !important}
+.fw-row:hover{background:#FFF9F0 !important}
+.fw-card:hover{transform:translateY(-2px)}
+.fw-card{transition:transform .15s ease}
+@media (max-width: 900px){.fw-side{display:none !important}}
+</style>
+</helmet>
+<div style="box-sizing: border-box; min-height: 100vh; padding: 24px; display: flex; flex-wrap: wrap; gap: 32px; background: #FFF9F0; font-family: 'Nunito', system-ui, sans-serif; color: #3D3533">
+  <div class="fw-side" style="flex: 0 0 264px; display: flex">
+    <dc-import name="AppSidebar" active="kitchen" hint-size="264px,852px"></dc-import>
+  </div>
+
+  <main style="flex: 999 1 560px; min-width: 0; max-width: 1080px; padding: 8px 8px 24px; display: flex; flex-direction: column; gap: 28px">
+    <dc-import name="KitchenBar" tab="items" sync="synced" hint-size="100%,150px"></dc-import>
+
+    <section aria-labelledby="exp-h" style="display: flex; flex-direction: column; gap: 14px">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+        <h1 id="exp-h" style="margin: 0; display: flex; align-items: center; gap: 10px; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 32px; line-height: 1.1; font-weight: 800">
+          <span aria-hidden="true" style="width: 40px; height: 40px; border-radius: 12px; background: #FFE3E1; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B23A33" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2"></path><path d="M10 2h4"></path></svg></span>
+          Use these soon
+        </h1>
+        <div style="display: flex; gap: 8px">
+          <a href="#" style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px 0 12px; border-radius: 999px; background: #FFFFFF; border: 1.5px solid #898582; font-size: 14px; font-weight: 800; text-decoration: none">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="20.5" r="1.5"></circle><circle cx="18" cy="20.5" r="1.5"></circle><path d="M2 3h2.5l2.6 12.2a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.5L21.5 8H5.6"></path></svg>
+            Grocery list
+          </a>
+          <a href="#" style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px 0 12px; border-radius: 999px; background: #FFFFFF; border: 1.5px solid #898582; font-size: 14px; font-weight: 800; text-decoration: none">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.9A4 4 0 0 1 7.4 6a5 5 0 0 1 9.2 0A4 4 0 0 1 18 13.9V21H6z"></path><path d="M6 17h12"></path></svg>
+            Recipes for these
+          </a>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px">
+        <sc-for list="{{soon}}" as="s" hint-placeholder-count="5">
+          <a href="ItemDetail.dc.html" class="fw-card" style="display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 20px; background: #FFFFFF; box-shadow: 0 12px 32px rgba(61, 53, 51, 0.06); text-decoration: none">
+            <span style="align-self: flex-start; height: 28px; padding: 0 10px; border-radius: 999px; background: {{s.expBg}}; color: {{s.expFg}}; font-size: 13px; font-weight: 800; display: flex; align-items: center">{{s.expLabel}}</span>
+            <span style="display: flex; flex-direction: column; gap: 2px">
+              <span style="font-size: 17px; font-weight: 800">{{s.name}}</span>
+              <span style="font-size: 13px; color: #6B6663">{{s.qty}} · {{s.loc}}</span>
+            </span>
+            <span style="align-self: flex-start; display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px 0 6px; border-radius: 999px; background: {{s.ownerBg}}; font-size: 12px; font-weight: 800">
+              <span aria-hidden="true" style="width: 16px; height: 16px; border-radius: 50%; background: #FFFFFF; font-size: 9px; display: flex; align-items: center; justify-content: center">{{s.ownerMark}}</span>
+              {{s.owner}}
+            </span>
+          </a>
+        </sc-for>
+      </div>
+    </section>
+
+    <section aria-labelledby="inv-h" style="padding: 24px; border-radius: 24px; background: #FFFFFF; box-shadow: 0 12px 32px rgba(61, 53, 51, 0.06); display: flex; flex-direction: column; gap: 16px">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+        <h2 id="inv-h" style="margin: 0; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 26px; font-weight: 800">Everything in the kitchen</h2>
+        <a href="RecentlyRemoved.dc.html" style="padding: 6px 0; font-size: 14px; font-weight: 800">Recently removed</a>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
+        <div role="tablist" aria-label="Storage" style="display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #F3ECE4">
+          <sc-for list="{{locTabs}}" as="t" hint-placeholder-count="4">
+            <button type="button" role="tab" aria-selected="{{t.sel}}" onClick="{{t.pick}}" style="height: 40px; padding: 0 16px; border: none; border-radius: 999px; background: {{t.bg}}; box-shadow: {{t.sh}}; color: #3D3533; font-family: inherit; font-size: 14px; font-weight: {{t.fw}}; cursor: pointer">{{t.label}}</button>
+          </sc-for>
+        </div>
+        <div role="group" aria-label="Owner" style="display: flex; flex-wrap: wrap; gap: 6px">
+          <sc-for list="{{ownTabs}}" as="o" hint-placeholder-count="5">
+            <button type="button" aria-pressed="{{o.sel}}" onClick="{{o.pick}}" style="height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid {{o.border}}; background: {{o.bg}}; color: {{o.fg}}; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer">{{o.label}}</button>
+          </sc-for>
+        </div>
+      </div>
+
+      <sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+        <div style="display: flex; flex-direction: column">
+          <h3 style="margin: 8px 0 4px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; color: #6B6663">
+            <span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 3px; background: {{g.color}}"></span>
+            {{g.label}} · {{g.count}}
+          </h3>
+          <sc-for list="{{g.items}}" as="i" hint-placeholder-count="3">
+            <a href="ItemDetail.dc.html" class="fw-row" style="display: flex; align-items: center; gap: 14px; min-height: 60px; padding: 8px 10px; border-radius: 14px; border-top: 1.5px solid #F3ECE4; text-decoration: none">
+              <span style="flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                <span style="font-size: 16px; font-weight: 800">{{i.name}}</span>
+                <span style="font-size: 13px; color: #6B6663">{{i.sub}}</span>
+              </span>
+              <sc-if value="{{i.isLevel}}" hint-placeholder-val="{{false}}">
+                <span style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800">
+                  <span aria-hidden="true" style="display: flex; gap: 3px">
+                    <span style="width: 14px; height: 10px; border-radius: 3px; background: {{i.l1}}"></span>
+                    <span style="width: 14px; height: 10px; border-radius: 3px; background: {{i.l2}}"></span>
+                    <span style="width: 14px; height: 10px; border-radius: 3px; background: {{i.l3}}"></span>
+                  </span>
+                  {{i.level}}
+                </span>
+              </sc-if>
+              <span style="flex-shrink: 0; display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px 0 6px; border-radius: 999px; background: {{i.ownerBg}}; font-size: 12px; font-weight: 800">
+                <span aria-hidden="true" style="width: 16px; height: 16px; border-radius: 50%; background: #FFFFFF; font-size: 9px; display: flex; align-items: center; justify-content: center">{{i.ownerMark}}</span>
+                {{i.owner}}
+              </span>
+              <span style="flex-shrink: 0; min-width: 96px; height: 28px; padding: 0 10px; box-sizing: border-box; border-radius: 999px; background: {{i.expBg}}; color: {{i.expFg}}; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center">{{i.expLabel}}</span>
+              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#898582" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
+            </a>
+          </sc-for>
+        </div>
+      </sc-for>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const st = this.state || {};
+    const loc = st.loc || 'all';
+    const own = st.own || 'all';
+    const exp = (d) => {
+      if (d === null) return { expLabel: 'No date', expBg: '#F3ECE4', expFg: '#5E5552' };
+      if (d === 0) return { expLabel: 'Today', expBg: '#FFE3E1', expFg: '#8E2C26' };
+      if (d === 1) return { expLabel: 'Tomorrow', expBg: '#FFF3C4', expFg: '#5C4300' };
+      if (d <= 3) return { expLabel: d + ' days', expBg: '#FFF3C4', expFg: '#5C4300' };
+      if (d < 14) return { expLabel: d + ' days', expBg: '#D6F0DC', expFg: '#1F5E37' };
+      if (d < 60) return { expLabel: Math.round(d / 7) + ' weeks', expBg: '#D6F0DC', expFg: '#1F5E37' };
+      return { expLabel: Math.round(d / 30) + ' months', expBg: '#D6F0DC', expFg: '#1F5E37' };
+    };
+    const owners = {
+      you: { owner: 'Yours', ownerMark: 'Y', ownerBg: '#FFE3E1' },
+      shared: { owner: 'Shared', ownerMark: 'S', ownerBg: '#E3F3FB' },
+      ali: { owner: 'Ali', ownerMark: 'AR', ownerBg: '#EDE6FB' },
+      maryam: { owner: 'Maryam', ownerMark: 'MH', ownerBg: '#EDE6FB' }
+    };
+    const levelBars = (lv) => {
+      const n = { Low: 1, Half: 2, Full: 3 }[lv];
+      const c = lv === 'Low' ? '#D9524C' : '#3D3533';
+      return { l1: n >= 1 ? c : '#E3DCD3', l2: n >= 2 ? c : '#E3DCD3', l3: n >= 3 ? c : '#E3DCD3' };
+    };
+    const items = [
+      { name: 'Milk', qty: '2 L', sub: '2 L · 2 batches · earliest today', loc: 'fridge', o: 'shared', d: 0 },
+      { name: 'Spinach', qty: '1 bunch', sub: '1 bunch', loc: 'fridge', o: 'you', d: 1 },
+      { name: 'Chicken', qty: '1 kg', sub: '1 kg', loc: 'fridge', o: 'shared', d: 2 },
+      { name: 'Yoghurt', qty: '500 g', sub: '500 g', loc: 'fridge', o: 'maryam', d: 3 },
+      { name: 'Eggs', qty: '12 pieces', sub: '12 pieces', loc: 'fridge', o: 'ali', d: 9 },
+      { name: 'Butter', qty: '200 g', sub: '200 g', loc: 'fridge', o: 'shared', d: 21 },
+      { name: 'Basmati rice', qty: 'Half', sub: 'Tracked by level', loc: 'pantry', o: 'shared', d: null, level: 'Half' },
+      { name: 'Cooking oil', qty: 'Low', sub: 'Tracked by level', loc: 'pantry', o: 'shared', d: null, level: 'Low' },
+      { name: 'Masoor daal', qty: '1 kg', sub: '1 kg', loc: 'pantry', o: 'you', d: 180 },
+      { name: 'Tea leaves', qty: '250 g', sub: '250 g', loc: 'pantry', o: 'maryam', d: 150 },
+      { name: 'Bread', qty: '1 loaf', sub: '1 loaf', loc: 'cupboard', o: 'ali', d: 3 },
+      { name: 'Biscuits', qty: '2 packs', sub: '2 packs', loc: 'cupboard', o: 'you', d: 14 }
+    ];
+    const locNames = { fridge: 'Fridge', pantry: 'Pantry', cupboard: 'Cupboard' };
+    const locColors = { fridge: '#A9D8F0', pantry: '#FFE28A', cupboard: '#C9B9F2' };
+    const full = items.map((i) => Object.assign({}, i, exp(i.d), owners[i.o],
+      { isLevel: !!i.level }, i.level ? levelBars(i.level) : {}, { locName: locNames[i.loc] }));
+
+    const soon = full.filter((i) => i.d !== null && i.d <= 3)
+      .sort((a, b) => a.d - b.d)
+      .map((i) => Object.assign({}, i, { loc: i.locName }));
+
+    const filtered = full.filter((i) => (loc === 'all' || i.loc === loc) && (own === 'all' || i.o === own));
+    const groups = ['fridge', 'pantry', 'cupboard']
+      .map((k) => {
+        const its = filtered.filter((i) => i.loc === k)
+          .sort((a, b) => (a.d === null ? 999 : a.d) - (b.d === null ? 999 : b.d));
+        return { label: locNames[k], color: locColors[k], count: its.length + (its.length === 1 ? ' item' : ' items'), items: its };
+      })
+      .filter((g) => g.items.length > 0);
+
+    const count = (k) => items.filter((i) => i.loc === k).length;
+    const locTabs = [['all', 'All ' + items.length], ['fridge', 'Fridge ' + count('fridge')], ['pantry', 'Pantry ' + count('pantry')], ['cupboard', 'Cupboard ' + count('cupboard')]]
+      .map(([id, label]) => {
+        const on = id === loc;
+        return { label, sel: on ? 'true' : 'false', bg: on ? '#FFFFFF' : 'transparent', sh: on ? '0 2px 6px rgba(61,53,51,0.12)' : 'none', fw: on ? '800' : '700', pick: () => this.setState({ loc: id }) };
+      });
+    const ownTabs = [['all', 'Everyone'], ['you', 'Yours'], ['shared', 'Shared'], ['ali', 'Ali'], ['maryam', 'Maryam']]
+      .map(([id, label]) => {
+        const on = id === own;
+        return { label, sel: on ? 'true' : 'false', bg: on ? '#3D3533' : '#FFFFFF', fg: on ? '#FFFFFF' : '#3D3533', border: on ? '#3D3533' : '#898582', pick: () => this.setState({ own: id }) };
+      });
+
+    return { soon, groups, locTabs, ownTabs };
+  }
+}
+</script>
+</body>
+</html>

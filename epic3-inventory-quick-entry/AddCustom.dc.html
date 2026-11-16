@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FridgeWise – Add a custom item</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#3D3533;text-decoration-color:#FF7F79;text-decoration-thickness:2px;text-underline-offset:3px}a:hover{color:#000000}
+:focus-visible{outline:3px solid #3D3533;outline-offset:3px}
+.fw-btn{transition:transform .12s ease, box-shadow .12s ease}
+.fw-btn:active{transform:translateY(4px);box-shadow:none !important}
+@media (max-width: 900px){.fw-side{display:none !important}}
+</style>
+</helmet>
+<div style="box-sizing: border-box; min-height: 100vh; padding: 24px; display: flex; flex-wrap: wrap; gap: 32px; background: #FFF9F0; font-family: 'Nunito', system-ui, sans-serif; color: #3D3533">
+  <div class="fw-side" style="flex: 0 0 264px; display: flex">
+    <dc-import name="AppSidebar" active="kitchen" hint-size="264px,852px"></dc-import>
+  </div>
+
+  <main style="flex: 999 1 560px; min-width: 0; max-width: 1080px; padding: 16px 8px 24px; display: flex; flex-direction: column; align-items: center">
+    <div style="width: 100%; max-width: 680px; display: flex; flex-direction: column">
+      <a href="AddItem.dc.html" style="align-self: flex-start; display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 12px 0 4px; font-size: 15px; font-weight: 800; text-decoration: none">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+        Back
+      </a>
+
+      <h1 style="margin: 12px 0 0; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 40px; line-height: 1.05; font-weight: 800; letter-spacing: -0.5px">What did you get?</h1>
+
+      <div style="margin-top: 20px; position: relative">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6B6663" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 20px; top: 19px"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+        <label for="q" style="position: absolute; left: -9999px">Search items</label>
+        <input id="q" type="search" value="kulfi" autocomplete="off" style="width: 100%; height: 60px; box-sizing: border-box; padding: 0 20px 0 54px; border: 2px solid #3D3533; box-shadow: 0 0 0 4px #FFE3E1; border-radius: 20px; background: #FFFFFF; font-family: inherit; font-size: 18px; font-weight: 700; color: #3D3533">
+      </div>
+
+      <section aria-labelledby="none-h" style="margin-top: 24px; padding: 28px; border-radius: 24px; background: #FFFFFF; box-shadow: 0 12px 32px rgba(61, 53, 51, 0.06); display: flex; flex-direction: column; gap: 20px">
+        <div style="display: flex; align-items: center; gap: 14px">
+          <span aria-hidden="true" style="flex-shrink: 0; width: 56px; height: 56px; border-radius: 18px; background: #FFE28A; display: flex; align-items: center; justify-content: center">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3D3533" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path><path d="M8.5 11h5"></path></svg>
+          </span>
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <h2 id="none-h" style="margin: 0; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 24px; line-height: 1.15; font-weight: 800">“kulfi” isn't in our list yet</h2>
+            <span style="font-size: 15px; color: #6B6663">No problem. Add it as your own item.</span>
+          </div>
+        </div>
+
+        <fieldset style="margin: 0; padding: 0; border: none; display: flex; flex-direction: column; gap: 10px">
+          <legend style="padding: 0; margin-bottom: 10px; font-size: 15px; font-weight: 800">Where does it go?</legend>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px">
+            <sc-for list="{{spots}}" as="s" hint-placeholder-count="4">
+              <button type="button" role="radio" aria-checked="{{s.sel}}" onClick="{{s.pick}}" style="height: 44px; padding: 0 18px; border-radius: 999px; border: 1.5px solid {{s.border}}; background: {{s.bg}}; color: {{s.fg}}; font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer">{{s.label}}</button>
+            </sc-for>
+          </div>
+        </fieldset>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 12px">
+          <a href="Main.dc.html" class="fw-btn" style="flex: 1 1 240px; display: flex; align-items: center; justify-content: center; gap: 8px; height: 54px; border-radius: 999px; background: #FF7F79; box-shadow: 0 4px 0 #D9524C; font-size: 16px; font-weight: 800; text-decoration: none">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+            Add “Kulfi” to {{spotName}}
+          </a>
+          <a href="ItemForm.dc.html" class="fw-btn" style="flex: 0 1 auto; display: flex; align-items: center; justify-content: center; height: 54px; padding: 0 24px; box-sizing: border-box; border-radius: 999px; background: #FFFFFF; border: 1.5px solid #898582; box-shadow: 0 4px 0 #E3DCD3; font-size: 16px; font-weight: 800; text-decoration: none">Add details first</a>
+        </div>
+        <span style="font-size: 14px; color: #6B6663">It'll show up in “You often add” next time. No expiry date is set unless you add one.</span>
+      </section>
+
+      <p style="margin: 18px 4px 0; font-size: 15px; color: #6B6663">Did you mean <a href="AddItem.dc.html" style="font-weight: 800">Kulcha</a>?</p>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const spot = (this.state && this.state.spot) || 'Freezer';
+    const spots = ['Fridge', 'Freezer', 'Pantry', 'Cupboard'].map((label) => {
+      const on = label === spot;
+      return { label, sel: on ? 'true' : 'false', bg: on ? '#3D3533' : '#FFFFFF', fg: on ? '#FFFFFF' : '#3D3533', border: on ? '#3D3533' : '#898582', pick: () => this.setState({ spot: label }) };
+    });
+    return { spots, spotName: spot };
+  }
+}
+</script>
+</body>
+</html>

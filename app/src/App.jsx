@@ -12,6 +12,7 @@ import { Home, Soon, Settings, Preferences } from './pages/AppPages';
 import { CreateKitchen, JoinKitchen, JoinLink, Members, Activity } from './pages/KitchenPages';
 import { InventoryHome, AddItem, QuickAdd } from './pages/InventoryPages';
 import { NewItem, EditItem, ItemDetail, RecentlyRemoved } from './pages/ItemPages';
+import { KitchenSettings } from './pages/KitchenSettings';
 
 function Splash() {
   return <div className="splash" role="status" aria-label="Loading"><span className="spinner" /></div>;
@@ -84,6 +85,7 @@ export default function App() {
         <Route path="/kitchen/join" element={<Private><JoinKitchen /></Private>} />
         <Route path="/kitchen/members" element={<Private><Members /></Private>} />
         <Route path="/kitchen/activity" element={<Private><Activity /></Private>} />
+        <Route path="/kitchen/settings" element={<Private><KitchenSettings /></Private>} />
         {/* Invite links: work signed out too, the code waits for sign-in. */}
         <Route path="/join/:code" element={<JoinLink />} />
         <Route path="*" element={<Navigate to="/home" replace />} />

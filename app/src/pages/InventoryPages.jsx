@@ -188,9 +188,19 @@ function AddItemBody() {
   const [recent, setRecent] = useState(null);
   useEffect(() => {
     if (recent || !mineLive) return;
-    const own = mineLive.filter((m) => (m.count || 0) > 0).slice(0, 6).map(myAsEntry);
-    const fill = STAPLES.map((id) => CATALOG.find((c) => c.id === id)).filter((c) => !own.some((o) => nameKey(o.name) === nameKey(c.name)));
-    setRecent({ mine: own.length > 0, list: [...own, ...fill].slice(0, 6) });
+    // S5 wireframe: "Recent" (last added) and "Frequent" (added most) rows.
+    const own = mineLive.filter((m) => (m.count || 0) > 0);
+    const ms = (m) => (m.lastAddedAt && m.lastAddedAt.toMillis ? m.lastAddedAt.toMillis() : 0);
+    const recentList = [...own].sort((a, b) => ms(b) - ms(a)).slice(0, 4);
+    const frequentList = own.filter((m) => !recentList.includes(m) && (m.count || 0) > 1).slice(0, 4);
+    const used = new Set([...recentList, ...frequentList].map((m) => nameKey(m.name)));
+    const popular = STAPLES.map((id) => CATALOG.find((c) => c.id === id)).filter((c) => !used.has(nameKey(c.name)))
+      .slice(0, Math.max(0, 6 - recentList.length - frequentList.length));
+    setRecent({ rows: [
+      ['Recent', recentList.map(myAsEntry)],
+      ['Frequent', frequentList.map(myAsEntry)],
+      [own.length ? 'Popular' : 'Popular items', popular]
+    ].filter(([, list]) => list.length) });
   }, [mineLive, recent]);
 
   useEffect(() => { setParams(q ? { q } : {}, { replace: true }); setCustomOpen(false); }, [q]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -246,19 +256,21 @@ function AddItemBody() {
         </div>
         {error && <div style={{ marginTop: 16 }}><ErrorAlert>{error}</ErrorAlert></div>}
 
-        {recent && <section aria-labelledby="rec-h" style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <h2 id="rec-h" className="feed-day" style={{ margin: 0 }}>{recent.mine ? 'You often add' : 'Popular'}</h2>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {recent.list.map((c) => {
-              const on = !!added[c.id];
-              return (
-                <button key={c.id} type="button" className="chip" aria-pressed={on} aria-label={on ? `${c.name} added. Undo` : `Add ${c.name}`} onClick={() => toggle(c)}>
-                  <span aria-hidden="true" style={{ fontSize: 18, lineHeight: 1 }}>{on ? '✓' : '+'}</span>{c.name}
-                </button>
-              );
-            })}
-          </div>
-        </section>}
+        {recent && recent.rows.map(([title, list], i) => (
+          <section key={title} aria-labelledby={`rec-h${i}`} style={{ marginTop: i ? 14 : 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <h2 id={`rec-h${i}`} className="feed-day" style={{ margin: 0 }}>{title}</h2>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {list.map((c) => {
+                const on = !!added[c.id];
+                return (
+                  <button key={c.id} type="button" className="chip" aria-pressed={on} aria-label={on ? `${c.name} added. Undo` : `Add ${c.name}`} onClick={() => toggle(c)}>
+                    <span aria-hidden="true" style={{ fontSize: 18, lineHeight: 1 }}>{on ? '✓' : '+'}</span>{c.name}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        ))}
 
         {q.trim() && results.length > 0 && (
           <section aria-labelledby="res-h" className="card" style={{ marginTop: 24, padding: 12, display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -336,16 +348,26 @@ function QuickAddBody() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
 
+  // S6 wireframe: "Search to add more" right here. Picked items go to the top, ticked.
+  const [q, setQ] = useState('');
+  const [extra, setExtra] = useState([]);
+  const matches = q.trim() ? searchCatalog(q, mine.map(myAsEntry)).slice(0, 5) : [];
+  const pick = (e) => {
+    if (!extra.some((x) => x.id === e.id)) setExtra((x) => [e, ...x]);
+    setSel((s) => ({ ...s, [e.id]: s[e.id] || 1 }));
+    setQ('');
+  };
+
   const rows = useMemo(() => {
     const out = [];
     const seen = new Set();
-    for (const e of [...mine.filter((m) => (m.count || 0) > 0).map(myAsEntry), ...QUICK.map((id) => CATALOG.find((c) => c.id === id))]) {
+    for (const e of [...extra, ...mine.filter((m) => (m.count || 0) > 0).map(myAsEntry), ...QUICK.map((id) => CATALOG.find((c) => c.id === id))]) {
       const k = nameKey(e.name);
-      if (seen.has(k) || out.length >= 12) continue;
+      if (seen.has(k) || out.length >= 12 + extra.length) continue;
       seen.add(k); out.push(e);
     }
     return out;
-  }, [mine]);
+  }, [mine, extra]);
 
   const upd = (id, v) => setSel((s) => { const n = { ...s }; if (v > 0) n[id] = v; else delete n[id]; return n; });
   const kinds = Object.keys(sel).length;
@@ -370,10 +392,26 @@ function QuickAddBody() {
         <h1 className="title" style={{ fontSize: 40, marginTop: 12 }}>Back from the shop?</h1>
         <p className="lead">Tick what you bought and add it all in one go.</p>
         {error && <div style={{ marginTop: 16 }}><ErrorAlert>{error}</ErrorAlert></div>}
-        <section aria-label="Items" className="card" style={{ marginTop: 24, padding: 10, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div style={{ marginTop: 20, position: 'relative' }}>
+          <span style={{ position: 'absolute', left: 18, top: 19, color: 'var(--muted)', display: 'flex' }}><SearchGlyph /></span>
+          <label htmlFor="qa-search" className="sr-only">Search to add more</label>
+          <input id="qa-search" type="search" autoComplete="off" className="search-input" style={{ boxShadow: 'none', border: '1.5px solid var(--line)' }}
+            placeholder="Search to add more" value={q} onChange={(e) => setQ(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter' && matches[0]) { e.preventDefault(); pick(matches[0]); } }} />
+          {matches.length > 0 && (
+            <ul role="listbox" aria-label="Matches" className="qa-matches">
+              {matches.map((m) => (
+                <li key={m.id}><button type="button" role="option" aria-selected="false" onClick={() => pick(m)}>
+                  <PlusGlyph size={16} /> {m.name} <span className="small">· {defaultsFor(m, active, user).location}</span>
+                </button></li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <section aria-label="Items" className="card" style={{ marginTop: 16, padding: 10, display: 'flex', flexDirection: 'column', gap: 2 }}>
           {rows.map((r) => {
-            const q = sel[r.id] || 0;
-            const on = q > 0;
+            const n = sel[r.id] || 0;
+            const on = n > 0;
             const spot = defaultsFor(r, active, user).location;
             const each = r.mode === 'level' ? 'by level' : formatAmount({ mode: 'amount', amount: r.amount, unit: r.unit, noun: r.noun });
             return (
@@ -383,20 +421,20 @@ function QuickAddBody() {
                   <span aria-hidden="true" className="tickbox" data-on={on}>{on && <CheckGlyph size={16} style={{ color: '#fff' }} />}</span>
                   <span style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <span style={{ fontSize: 16, fontWeight: 800 }}>{r.name}</span>
-                    <span style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 600 }}>{each} · {spot}</span>
+                    <span style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 600 }}>{on ? spot : `${each} · ${spot}`}{active.type === 'shared' ? ' · Mine' : ''}</span>
                   </span>
                 </label>
                 {on && r.mode !== 'level' && (
                   <div role="group" aria-label={`How many ${r.name}`} style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 2, padding: 3, borderRadius: 999, background: '#fff', border: '1.5px solid #D9D2CB' }}>
-                    <button type="button" className="step-btn" aria-label="Fewer" onClick={() => upd(r.id, q - 1)}>−</button>
-                    <span style={{ minWidth: 36, textAlign: 'center', fontSize: 15, fontWeight: 800 }}>×{q}</span>
-                    <button type="button" className="step-btn" aria-label="More" onClick={() => upd(r.id, q + 1)}>+</button>
+                    <button type="button" className="step-btn" aria-label="Less" onClick={() => upd(r.id, n - 1)}>−</button>
+                    <span style={{ minWidth: 64, textAlign: 'center', fontSize: 15, fontWeight: 800 }}>{formatAmount({ mode: 'amount', amount: r.amount * n, unit: r.unit, noun: r.noun })}</span>
+                    <button type="button" className="step-btn" aria-label="More" onClick={() => upd(r.id, n + 1)}>+</button>
                   </div>
                 )}
               </div>
             );
           })}
-          <Link to="/kitchen/add" style={{ margin: '6px 10px', padding: '8px 0', fontSize: 14 }}>Bought something else? Search for it</Link>
+          <Link to="/kitchen/add" style={{ margin: '6px 10px', padding: '8px 0', fontSize: 14 }}>Need more detail? Add one item at a time</Link>
         </section>
         <div className="quick-bar">
           <span style={{ fontSize: 15, fontWeight: 700 }}>{kinds === 0 ? 'Nothing ticked yet' : `${plural(kinds, 'item')} ticked`}</span>

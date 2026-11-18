@@ -335,6 +335,7 @@ function MembersInner() {
                   <Avatar id={m.id} name={m.name} />
                   <span style={{ flexGrow: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <span style={{ fontSize: 16, fontWeight: 800 }}>{m.name}{me && <span style={{ fontWeight: 700, color: 'var(--muted)' }}> (you)</span>}</span>
+                    {m.email && <span title={m.email} style={{ fontSize: 13, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.email}</span>}
                     <span style={{ fontSize: 13, color: 'var(--muted)' }}>{founder ? `Created the kitchen · ${shortDate(joined)}` : `Joined ${shortDate(joined)}`}</span>
                   </span>
                   {m.role === 'owner' && <span className="badge" style={{ height: 32, background: 'var(--butter)', fontSize: 13 }}><CrownGlyph /> Owner</span>}

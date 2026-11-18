@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthLayout } from '../components/Layouts';
 import { ErrorAlert } from '../components/ui';
 import { PeopleIcon, HouseIcon, DoorIcon, BellIcon, LeafIcon, CheckIcon } from '../components/Icons';
 import { useAuth } from '../auth/AuthProvider';
 import { saveProfile, ALLERGENS } from '../lib/profile';
+import { useKitchens, pendingInvite } from '../kitchen/KitchenProvider';
+import { createKitchen, previewInvite, joinKitchen, normalizeCode } from '../lib/kitchens';
+import { friendlyError } from '../auth/errors';
 
 const KITCHEN_OPTIONS = [
   { id: 'create-shared', title: 'Start a shared kitchen', text: 'A dorm or flat. Invite housemates with a link or code.', tile: 'var(--sky)', icon: <PeopleIcon /> },
@@ -53,8 +56,10 @@ export function DietaryFields({ value, onChange }) {
 export default function Onboarding() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
-  const [step, setStep] = useState(0);
-  const [kitchen, setKitchen] = useState((profile && profile.onboarding && profile.onboarding.kitchenChoice) || null);
+  const [step, setStep] = useState(0); // 0 choose, 0.5 create/join, 1 reminders, 2 food
+  const { active } = useKitchens();
+  const alreadyIn = !!active; // e.g. joined from an invite link already
+  const [kitchen, setKitchen] = useState((pendingInvite.get() && 'join') || (profile && profile.onboarding && profile.onboarding.kitchenChoice) || null);
   const [diet, setDiet] = useState((profile && profile.dietary) || { vegetarian: false, halal: false, allergens: [] });
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -85,7 +90,7 @@ export default function Onboarding() {
 
   return (
     <AuthLayout variant="onboarding">
-      <Steps step={step} />
+      <Steps step={Math.floor(step)} />
       <ErrorAlert>{error}</ErrorAlert>
 
       {step === 0 && (
@@ -102,10 +107,14 @@ export default function Onboarding() {
             ))}
           </div>
           <button type="button" className="btn btn-primary btn-block" style={{ marginTop: 24 }} disabled={!kitchen || busy}
-            onClick={() => save({ 'onboarding': { completed: false, kitchenChoice: kitchen } }, () => setStep(1))}>Continue</button>
+            onClick={() => save({ 'onboarding': { completed: false, kitchenChoice: kitchen } }, () => setStep(alreadyIn ? 1 : 0.5))}>Continue</button>
           <button type="button" className="link-btn" style={{ display: 'block', margin: '16px auto 0' }} disabled={busy}
             onClick={() => save({ 'onboarding': { completed: false, kitchenChoice: 'later' } }, () => setStep(1))}>I'll do this later</button>
         </section>
+      )}
+
+      {step === 0.5 && (
+        <KitchenStep choice={kitchen} onBack={() => setStep(0)} onDone={() => setStep(1)} />
       )}
 
       {step === 1 && (
@@ -148,5 +157,77 @@ export default function Onboarding() {
         </section>
       )}
     </AuthLayout>
+  );
+}
+
+// S3a/S3b wireframes: create the kitchen, or type the code, inside onboarding.
+function KitchenStep({ choice, onBack, onDone }) {
+  const join = choice === 'join';
+  const [name, setName] = useState('');
+  const [type, setType] = useState(choice === 'create-private' ? 'private' : 'shared');
+  const [code, setCode] = useState(() => normalizeCode(pendingInvite.get() || ''));
+  const [found, setFound] = useState(null);
+  const [error, setError] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    setFound(null);
+    if (!join || code.length !== 6) return undefined;
+    let live = true;
+    setBusy(true); setError(null);
+    previewInvite(code).then((k) => { if (live) { setFound(k); setBusy(false); } }, (e) => { if (live) { setError(friendlyError(e)); setBusy(false); } });
+    return () => { live = false; };
+  }, [code, join]);
+
+  const go = async (e) => {
+    e.preventDefault();
+    setError(null);
+    if (!join && !name.trim()) { setError('Give the kitchen a name.'); return; }
+    setBusy(true);
+    try {
+      if (join) { await joinKitchen(code); pendingInvite.clear(); }
+      else await createKitchen({ name, type });
+      onDone();
+    } catch (err) { setError(friendlyError(err)); setBusy(false); }
+  };
+
+  return (
+    <form aria-labelledby="ob-k" onSubmit={go} noValidate>
+      <button type="button" className="link-btn" style={{ marginTop: 16 }} onClick={onBack}>← Back</button>
+      <h1 id="ob-k" className="title" style={{ marginTop: 12 }}>{join ? 'Join a kitchen' : 'Name your kitchen'}</h1>
+      <p className="lead">{join ? 'Type the 6-character code a housemate sent you.' : 'You can change this and the storage spots later.'}</p>
+      {error && <div style={{ marginTop: 16 }}><ErrorAlert>{error}</ErrorAlert></div>}
+      {join ? (
+        <div className="field" style={{ marginTop: 24 }}>
+          <label htmlFor="ob-code" className="label">Invite code</label>
+          <input id="ob-code" className="input otp-input" autoFocus autoComplete="off" autoCapitalize="characters" maxLength={7} placeholder="K7P2QX"
+            value={code} onChange={(e) => setCode(normalizeCode(e.target.value))} aria-invalid={error ? 'true' : undefined} />
+          {found && (
+            <div role="status" className="found" style={{ marginTop: 12 }}>
+              <strong>{found.alreadyMember ? "You're already in " : 'Found it: '}{found.name}</strong>
+              <span className="small">Shared · {found.memberCount} member{found.memberCount === 1 ? '' : 's'}{found.ownerName ? ` · Owner: ${found.ownerName}` : ''}</span>
+            </div>
+          )}
+        </div>
+      ) : (
+        <>
+          <div className="field" style={{ marginTop: 24 }}>
+            <label htmlFor="ob-name" className="label">Name your kitchen</label>
+            <input id="ob-name" className="input" autoFocus maxLength={40} value={name} placeholder={type === 'shared' ? 'e.g. Room 4B kitchen' : 'e.g. Home kitchen'} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <fieldset style={{ margin: '20px 0 0', padding: 0, border: 'none' }}>
+            <legend className="label" style={{ padding: 0, marginBottom: 10 }}>Type</legend>
+            <div className="seg" role="radiogroup" aria-label="Type">
+              <button type="button" role="radio" aria-checked={type === 'shared'} onClick={() => setType('shared')}>Shared</button>
+              <button type="button" role="radio" aria-checked={type === 'private'} onClick={() => setType('private')}>Private</button>
+            </div>
+          </fieldset>
+        </>
+      )}
+      <button type="submit" className="btn btn-primary btn-block" style={{ marginTop: 24 }}
+        disabled={busy || (join ? !(found && code.length === 6) : !name.trim())}>
+        {busy ? <span className="spinner" /> : join ? (found && found.alreadyMember ? 'Continue' : 'Join and continue') : 'Create and continue'}
+      </button>
+    </form>
   );
 }

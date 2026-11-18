@@ -7,5 +7,5 @@ import { handleKitchen } from './_lib/kitchens.js';
 
 export default postHandler(async (body, { headers }) => {
   const token = await requireUser(headers);
-  return handleKitchen(body, token);
+  return handleKitchen(body, token, { headers });
 });

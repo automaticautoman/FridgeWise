@@ -26,6 +26,7 @@ import crypto from 'node:crypto';
 import { FieldValue } from 'firebase-admin/firestore';
 import { adminDb } from './admin.js';
 import { ApiError } from './auth.js';
+import { sendInviteEmail } from './mailer.js';
 
 const MINUTE = 60 * 1000;
 const HOUR = 60 * MINUTE;
@@ -162,7 +163,7 @@ async function create(token, body) {
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp()
     });
-    tx.create(memberRef(ref.id, token.uid), { name: who, role: 'owner', joinedAt: FieldValue.serverTimestamp() });
+    tx.create(memberRef(ref.id, token.uid), { name: who, email: token.email || null, role: 'owner', joinedAt: FieldValue.serverTimestamp() });
     activity(tx, ref.id, { type: 'kitchen-created', actorId: token.uid, actorName: who });
     tx.set(userRef(token.uid), { activeKitchenId: ref.id }, { merge: true });
   });
@@ -230,6 +231,44 @@ async function invite(token, body) {
     tx.set(inviteMetaRef(kitchenId), { code, expiresAt, issued: [...issued, now] });
     return ok({ code, expiresAt });
   });
+}
+
+// S9 wireframe: send the invite link and code to someone's email.
+const EMAILS_PER_HOUR = 10;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+function appOrigin(headers = {}) {
+  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, '');
+  const o = headers.origin || '';
+  return /^https?:\/\/[a-z0-9.-]+(:\d+)?$/i.test(o) ? o : 'http://localhost:5173';
+}
+
+async function inviteEmail(token, body, ctx = {}) {
+  const kitchenId = validKitchenId(body.kitchenId);
+  const to = String(body.email || '').trim().toLowerCase();
+  if (!EMAIL_RE.test(to) || to.length > 200) fail(400, 'kitchen/invalid-email');
+  const now = Date.now();
+  // Rate limit first (per kitchen), then reuse the current code or make one.
+  const kitchen = await db().runTransaction(async (tx) => {
+    const k = await loadAsMember(tx, kitchenId, token.uid);
+    if (k.type !== 'shared') fail(409, 'kitchen/private');
+    if (!canInvite(k, token.uid)) fail(403, 'kitchen/invites-owner-only');
+    const metaSnap = await tx.get(inviteMetaRef(kitchenId));
+    const sent = ((metaSnap.exists && metaSnap.data().emails) || []).filter((t) => now - t < HOUR);
+    if (sent.length >= EMAILS_PER_HOUR) fail(429, 'kitchen/too-many-emails');
+    tx.set(inviteMetaRef(kitchenId), { emails: [...sent, now] }, { merge: true });
+    return k;
+  });
+  const { body: inv } = await invite(token, { kitchenId });
+  const inviter = await displayName(token);
+  const link = `${appOrigin(ctx.headers)}/join/${inv.code}`;
+  try {
+    await sendInviteEmail(to, { inviter, kitchenName: kitchen.name, code: inv.code, link, expiresAt: inv.expiresAt });
+  } catch (err) {
+    console.error('[invite] email failed:', err.message);
+    fail(502, 'kitchen/email-failed');
+  }
+  return ok({ ok: true, code: inv.code });
 }
 
 async function revokeInvite(token, body) {
@@ -323,7 +362,7 @@ async function join(token, body) {
       memberCount: FieldValue.increment(1),
       updatedAt: FieldValue.serverTimestamp()
     });
-    tx.set(memberRef(kitchenId, token.uid), { name: who, role: 'member', joinedAt: FieldValue.serverTimestamp() });
+    tx.set(memberRef(kitchenId, token.uid), { name: who, email: token.email || null, role: 'member', joinedAt: FieldValue.serverTimestamp() });
     activity(tx, kitchenId, { type: 'member-joined', actorId: token.uid, actorName: who });
     tx.set(userRef(token.uid), { activeKitchenId: kitchenId }, { merge: true });
     return ok({ kitchenId, alreadyMember: false });
@@ -410,13 +449,13 @@ async function transfer(token, body) {
 
 // ---------- router ----------
 
-const ACTIONS = { create, update, invite, revokeInvite, preview, join, leave, removeMember, transfer };
+const ACTIONS = { create, update, invite, inviteEmail, revokeInvite, preview, join, leave, removeMember, transfer };
 
-export async function handleKitchen(body, token) {
+export async function handleKitchen(body, token, ctx = {}) {
   const fn = Object.prototype.hasOwnProperty.call(ACTIONS, body.action) ? ACTIONS[body.action] : null;
   if (!fn) fail(400, 'kitchen/unknown-action');
   try {
-    return await fn(token, body);
+    return await fn(token, body, ctx);
   } catch (err) {
     if (err instanceof ApiError && err.retryAfter) return { status: err.httpStatus, body: { error: err.code, retryAfter: err.retryAfter } };
     throw err;

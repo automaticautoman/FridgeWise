@@ -133,6 +133,10 @@ try {
   check('makes a 6-character code', /^[A-HJ-NP-Z2-9]{6}$/.test(inv.code || ''), JSON.stringify(inv));
   check('code lasts 7 days', Math.abs(inv.expiresAt - Date.now() - 7 * 864e5) < 60e3);
   check('asking again returns the same code', (await api('owner', 'invite', { kitchenId: kid })).code === inv.code);
+  check('invite email needs a real address', (await api('owner', 'inviteEmail', { kitchenId: kid, email: 'nope' })).error === 'kitchen/invalid-email');
+  check('no invite emails for private kitchens', (await api('owner', 'inviteEmail', { kitchenId: priv.kitchenId, email: 'a@example.com' })).error === 'kitchen/private');
+  check('outsiders cannot send invite emails', (await api('outsider', 'inviteEmail', { kitchenId: kid, email: 'a@example.com' })).error === 'kitchen/not-found');
+  check('owner renames the kitchen and its spots', (await api('owner', 'update', { kitchenId: kid, name: 'Room 4B', locations: ['Fridge', 'Freezer', 'Pantry', 'Cupboard'] })).ok === true);
   check('private kitchens have no invites', (await api('owner', 'invite', { kitchenId: priv.kitchenId })).error === 'kitchen/private');
   const inv2 = await api('owner', 'invite', { kitchenId: kid, renew: true });
   check('"New code" makes a different code', inv2.code && inv2.code !== inv.code);
@@ -141,7 +145,7 @@ try {
   // F09 join
   console.log('F09 join');
   const pv = await api('member', 'preview', { code: inv2.code.toLowerCase().replace(/(...)/, '$1 ') });
-  check('preview shows the kitchen (code is case/space tolerant)', pv.name === 'Room 4B kitchen' && pv.ownerName === 'Sara Test' && pv.memberCount === 1, JSON.stringify(pv));
+  check('preview shows the kitchen (code is case/space tolerant)', pv.name === 'Room 4B' && pv.ownerName === 'Sara Test' && pv.memberCount === 1, JSON.stringify(pv));
   const j = await api('member', 'join', { code: inv2.code });
   check('joins with the code', j.status === 200 && j.kitchenId === kid && !j.alreadyMember);
   check('joining twice is harmless', (await api('member', 'join', { code: inv2.code })).alreadyMember === true);
@@ -152,6 +156,7 @@ try {
   console.log('F10 members');
   const ms = await allowed('member can list members', getDocs(collection(ali.db, 'kitchens', kid, 'members')));
   check('owner is marked owner', ms && ms.docs.find((d) => d.id === sara.uid).data().role === 'owner');
+  check('members have their email saved', ms && ms.docs.every((d) => /@fridgewise\.test$/.test(d.data().email || '')));
 
   // Invite policy
   console.log('Invite policy');

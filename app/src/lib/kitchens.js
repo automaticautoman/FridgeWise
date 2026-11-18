@@ -49,6 +49,8 @@ export const getInvite = (kitchenId, { renew = false } = {}) => kitchenApi('invi
 // The current code if there is one, without making a new one: { code: null } otherwise.
 export const peekInvite = (kitchenId) => kitchenApi('invite', { kitchenId, peek: true });
 export const revokeInvite = (kitchenId) => kitchenApi('revokeInvite', { kitchenId });
+// S9: emails the link and code (up to 10 emails an hour per kitchen).
+export const inviteByEmail = (kitchenId, email) => kitchenApi('inviteEmail', { kitchenId, email });
 
 export const inviteLink = (code) => `${window.location.origin}/join/${code}`;
 export const normalizeCode = (v) => String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);

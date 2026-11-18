@@ -1,6 +1,6 @@
 // Epic 3 screens, part 2: item form (ItemForm mockup), item detail with
 // batches and "Take some out" (ItemDetail mockup), Recently removed.
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { AppLayout } from '../components/Layouts';
 import { ErrorAlert } from '../components/ui';
@@ -400,7 +400,6 @@ function BatchRow({ b, n, single, kitchen, user, profile, onError }) {
         <span style={{ fontSize: 16, fontWeight: 800 }}>Bought {shortDate(added)}</span>
         <span style={{ fontSize: 13, color: 'var(--muted)' }}>
           Added by {by} · {urgent ? <strong style={{ color: '#8E2C26' }}>{dateLine(b)}</strong> : dateLine(b)}
-          {!single && <> · <Link to={`/kitchen/item/${b.id}/edit`} style={{ fontSize: 13 }}>Edit</Link></>}
         </span>
       </span>
       {b.mode === 'level' ? (
@@ -415,6 +414,40 @@ function BatchRow({ b, n, single, kitchen, user, profile, onError }) {
         <Stepper label={`Batch ${n} amount`} value={fromBase(Number(b.amount) || 0, eu)} step={STEP[eu]} unit={eu === 'pieces' ? (b.noun || 'pcs') : eu === 'l' ? 'L' : eu}
           onChange={(v) => { if (v > 0) save(() => setAmount(kitchen, user, profile, b, toBase(v, eu).amount)); }} />
       )}
+      <BatchMenu b={b} n={n} kitchen={kitchen} user={user} profile={profile} onError={onError} />
+    </div>
+  );
+}
+
+// S7 wireframe: "…" on each batch, with Edit and Delete for that batch only.
+function BatchMenu({ b, n, kitchen, user, profile, onError }) {
+  const [open, setOpen] = useState(false);
+  const [confirm, setConfirm] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!open) return undefined;
+    const close = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const esc = (e) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', close); document.addEventListener('keydown', esc);
+    return () => { document.removeEventListener('mousedown', close); document.removeEventListener('keydown', esc); };
+  }, [open]);
+  const remove = async () => {
+    setBusy(true);
+    try { await deleteItem(kitchen, user, profile, b); setConfirm(false); }
+    catch (err) { onError(friendlyError(err)); setBusy(false); setConfirm(false); }
+  };
+  return (
+    <div ref={ref} style={{ position: 'relative', flexShrink: 0 }}>
+      <button type="button" className="ghost-btn" style={{ width: 44, height: 44, padding: 0, fontSize: 20, lineHeight: 1 }}
+        aria-label={`More for batch ${n}`} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((o) => !o)}>⋯</button>
+      {open && (
+        <div role="menu" className="batch-menu">
+          <Link role="menuitem" to={`/kitchen/item/${b.id}/edit`}><EditGlyph /> Edit this batch</Link>
+          <button type="button" role="menuitem" className="danger-text" onClick={() => { setOpen(false); setConfirm(true); }}><TrashGlyph /> Delete (added by mistake)</button>
+        </div>
+      )}
+      {confirm && <DeleteDialog name={`this batch of ${b.name}`} busy={busy} onCancel={() => setConfirm(false)} onConfirm={remove} />}
     </div>
   );
 }

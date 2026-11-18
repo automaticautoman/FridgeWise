@@ -1,6 +1,6 @@
 // F08: Invite housemates (Invite mockup).
 import { useEffect, useState } from 'react';
-import { getInvite, inviteLink, updateKitchen } from '../lib/kitchens';
+import { getInvite, inviteLink, updateKitchen, inviteByEmail } from '../lib/kitchens';
 import { friendlyError } from '../auth/errors';
 import { ErrorAlert } from '../components/ui';
 import { Dialog, CloseGlyph, LinkGlyph, CopyGlyph, ClockGlyph, RefreshGlyph, UserPlusGlyph, CheckGlyph, expiresIn } from './kitchenUi';
@@ -84,6 +84,8 @@ export default function InviteDialog({ kitchen, isOwner, onClose }) {
         </>
       )}
 
+      {invite && <EmailInvite kitchenId={kitchen.id} />}
+
       {isOwner && (
         <fieldset style={{ margin: 0, padding: 16, border: 'none', borderRadius: 20, background: 'var(--cream)', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <legend style={{ float: 'left', padding: 0, fontSize: 15, fontWeight: 800 }}>Who can invite people?</legend>
@@ -97,5 +99,35 @@ export default function InviteDialog({ kitchen, isOwner, onClose }) {
 
       <button type="button" className="btn btn-secondary" style={{ alignSelf: 'flex-end', height: 52 }} onClick={onClose}>Done</button>
     </Dialog>
+  );
+}
+
+// S9 wireframe: "Invite via email".
+function EmailInvite({ kitchenId }) {
+  const [email, setEmail] = useState('');
+  const [state, setState] = useState(null); // null | 'sending' | { sent: email } | { error }
+  const send = async (e) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setState('sending');
+    try { await inviteByEmail(kitchenId, email.trim()); setState({ sent: email.trim() }); setEmail(''); }
+    catch (err) { setState({ error: friendlyError(err) }); }
+  };
+  return (
+    <form className="field" onSubmit={send} noValidate>
+      <label htmlFor="inv-email" className="label">Or invite by email</label>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <input id="inv-email" className="input" type="email" autoComplete="off" placeholder="housemate@example.com" value={email}
+          style={{ flexGrow: 1, minWidth: 0, height: 52 }} onChange={(e) => { setEmail(e.target.value); if (state && state !== 'sending') setState(null); }}
+          aria-invalid={state && state.error ? 'true' : undefined} />
+        <button type="submit" className="btn btn-secondary btn-sm" style={{ height: 52 }} disabled={!email.trim() || state === 'sending'}>
+          {state === 'sending' ? <span className="spinner" /> : 'Send invite'}
+        </button>
+      </div>
+      <span aria-live="polite">
+        {state && state.sent && <span className="field-ok"><CheckGlyph size={16} /> Invite sent to {state.sent}</span>}
+        {state && state.error && <span className="field-error">{state.error}</span>}
+      </span>
+    </form>
   );
 }

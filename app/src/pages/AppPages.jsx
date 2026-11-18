@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { useKitchens, pendingInvite } from '../kitchen/KitchenProvider';
 import { KitchenTile, kitchenMeta } from '../kitchen/kitchenUi';
 import { AppLayout } from '../components/Layouts';
 import { ErrorAlert } from '../components/ui';
 import { ChevronIcon, CheckIcon, PeopleIcon, HouseIcon, DoorIcon, BellIcon, LockIcon, LeafIcon } from '../components/Icons';
 import { useAuth } from '../auth/AuthProvider';
-import { hasPasswordProvider, hasGoogleProvider } from '../auth/authService';
+import { hasPasswordProvider, hasGoogleProvider, signOut } from '../auth/authService';
 import { saveProfile } from '../lib/profile';
 import { DietaryFields } from './Onboarding';
 
@@ -86,6 +86,8 @@ function Row({ to, icon, title, sub }) {
 
 export function Settings() {
   const { user, profile } = useAuth();
+  const { active } = useKitchens();
+  const navigate = useNavigate();
   const methods = [hasPasswordProvider(user) && 'Email and password', hasGoogleProvider(user) && 'Google'].filter(Boolean).join(' · ');
   const d = (profile && profile.dietary) || { allergens: [] };
   const diet = [d.vegetarian && 'Vegetarian', d.halal && 'Halal', ...(d.allergens || []).map((a) => 'No ' + a.toLowerCase())].filter(Boolean).join(', ') || 'None set';
@@ -99,7 +101,11 @@ export function Settings() {
         <Row to="/settings/password" icon={<LockIcon />} title={hasPasswordProvider(user) ? 'Change password' : 'Add a password'} sub={'Sign-in: ' + methods} />
         <Row to="/settings/preferences" icon={<LeafIcon />} title="Food preferences" sub={diet} />
         <Row to="/settings/preferences" icon={<BellIcon />} title="Reminders" sub={permText} />
+        {active && <Row to="/kitchen/settings" icon={<HouseIcon />} title="Kitchen settings" sub={active.name} />}
       </section>
+      {/* On phones the sidebar (with Sign out) is hidden, so it lives here too. */}
+      <button type="button" className="btn btn-secondary" style={{ marginTop: 24, alignSelf: 'flex-start' }}
+        onClick={async () => { await signOut(); navigate('/signin', { replace: true }); }}>Sign out</button>
     </AppLayout>
   );
 }

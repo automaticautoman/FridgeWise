@@ -112,12 +112,13 @@ export function KitchenLayout({ tab, children }) {
             {canInvite && (
               <button type="button" className="btn btn-secondary btn-sm" style={{ height: 48 }} onClick={() => setInviting(true)}><UserPlusGlyph size={18} /> Invite</button>
             )}
-            <Link to="/kitchen/add" className="btn btn-primary btn-sm" style={{ height: 48 }}><PlusGlyph size={18} /> Add item</Link>
+            <Link to="/kitchen/add" className="btn btn-primary btn-sm kbar-add" style={{ height: 48 }}><PlusGlyph size={18} /> Add item</Link>
           </div>
           <nav aria-label="Kitchen sections" className="tabs">
             <Link to="/kitchen" aria-current={tab === 'items' ? 'page' : undefined}>Items</Link>
             <Link to="/kitchen/members" aria-current={tab === 'members' ? 'page' : undefined}>Members</Link>
             <Link to="/kitchen/activity" aria-current={tab === 'activity' ? 'page' : undefined}>Activity</Link>
+            <Link to="/kitchen/settings" aria-current={tab === 'settings' ? 'page' : undefined}>Settings</Link>
           </nav>
         </div>
         {children}

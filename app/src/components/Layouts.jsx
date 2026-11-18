@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import BrandPanel from './BrandPanel';
 import { Logo } from './ui';
 import { FridgeIcon, SignOutIcon } from './Icons';
@@ -38,6 +38,9 @@ export function AppLayout({ children }) {
   const kitchenLabel = loading ? '' : active ? active.name : 'No kitchen yet';
   const name = (profile && profile.name) || (user && user.displayName) || 'Chef';
   const doSignOut = async () => { await signOut(); navigate('/signin', { replace: true }); };
+  const { pathname } = useLocation();
+  // The + isn't needed on screens that are already about adding.
+  const hideFab = /^\/kitchen\/(add|item)/.test(pathname);
 
   return (
     <div className="app">
@@ -66,7 +69,28 @@ export function AppLayout({ children }) {
           </div>
         </nav>
       </div>
+      {/* Phones (S4/S9 wireframes): logo on top, bottom bar, floating + to add. */}
+      <header className="mobile-top"><Logo to="/home" /><span className="avatar" aria-hidden="true">{initials(name)}</span></header>
       <main className="app-main">{children}</main>
+      {active && !hideFab && (
+        <Link to="/kitchen/add" className="fab" aria-label="Add item">
+          <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round"><path d="M12 5v14" /><path d="M5 12h14" /></svg>
+        </Link>
+      )}
+      <nav aria-label="Main" className="bottom-nav">
+        {BOTTOM.map((n) => (
+          <NavLink key={n.to} to={n.to} className={({ isActive }) => (isActive || (n.also && n.also.some((p) => pathname.startsWith(p))) ? 'active' : undefined)}>
+            {n.icon}<span>{n.label}</span>
+          </NavLink>
+        ))}
+      </nav>
     </div>
   );
 }
+
+const BOTTOM = [
+  { to: '/kitchen', label: 'Home', also: ['/home'], icon: NAV[0].icon },
+  { to: '/soon/shopping', label: 'Grocery', icon: NAV[4].icon },
+  { to: '/soon/recipes', label: 'Recipes', icon: NAV[3].icon },
+  { to: '/settings', label: 'Me', icon: NAV[5].icon }
+];

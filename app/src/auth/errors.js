@@ -72,6 +72,12 @@ export function friendlyError(err, context = 'general') {
       return 'This kitchen is full.';
     case 'kitchen/transfer-first':
       return "You're the owner, so pick someone to take over before you leave.";
+    case 'kitchen/invalid-email':
+      return "That doesn't look like an email address.";
+    case 'kitchen/too-many-emails':
+      return "You've sent a lot of invite emails. Wait a bit, or share the link instead.";
+    case 'kitchen/email-failed':
+      return "We couldn't send that email just now. Share the link or code instead.";
     case 'kitchen/not-a-member':
       return "That person isn't in this kitchen any more.";
     case 'auth/credential-already-in-use':

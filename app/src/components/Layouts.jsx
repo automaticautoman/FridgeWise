@@ -89,7 +89,8 @@ export function AppLayout({ children }) {
 }
 
 const BOTTOM = [
-  { to: '/kitchen', label: 'Home', also: ['/home'], icon: NAV[0].icon },
+  { to: '/home', label: 'Home', icon: NAV[0].icon },
+  { to: '/kitchen', label: 'Kitchen', icon: NAV[1].icon },
   { to: '/soon/shopping', label: 'Grocery', icon: NAV[4].icon },
   { to: '/soon/recipes', label: 'Recipes', icon: NAV[3].icon },
   { to: '/settings', label: 'Me', icon: NAV[5].icon }

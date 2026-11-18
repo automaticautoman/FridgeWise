@@ -9,6 +9,7 @@ import { useAuth } from '../auth/AuthProvider';
 import { hasPasswordProvider, hasGoogleProvider, signOut } from '../auth/authService';
 import { saveProfile } from '../lib/profile';
 import { DietaryFields } from './Onboarding';
+import HomeDashboard from './HomeDashboard';
 
 // Next step on Home, from the choice made in onboarding (F05).
 const KITCHEN_NEXT = {
@@ -27,8 +28,8 @@ export function Home() {
 
   // Opened an invite link before signing in or finishing onboarding.
   if (pendingInvite.get()) return <Navigate to="/kitchen/join" replace />;
-  // FR3.17: opening the app shows the kitchen, expiring-soon first.
-  if (!loading && active) return <Navigate to="/kitchen" replace />;
+  // With a kitchen, Home is an overview (expiring soon first, FR3.17).
+  if (!loading && active) return <AppLayout><HomeDashboard /></AppLayout>;
 
   return (
     <AppLayout>

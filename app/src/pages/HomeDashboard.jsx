@@ -1,7 +1,7 @@
 // Home, once you have a kitchen: a quick overview with the most urgent things
 // first (FR3.17: expiring soon first; the full inventory is one tap away).
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
 import { useKitchens } from '../kitchen/KitchenProvider';
 import { watchActivity } from '../lib/kitchens';
@@ -20,7 +20,10 @@ function greeting() {
 
 export default function HomeDashboard() {
   const { user, profile } = useAuth();
-  const { active, canInvite } = useKitchens();
+  const { active, kitchens, switchTo, canInvite } = useKitchens();
+  const navigate = useNavigate();
+  // Opening another kitchen makes it the current one, like the switcher.
+  const open = async (k) => { if (k.id !== active.id) await switchTo(k.id); navigate('/kitchen'); };
   const items = useItems(active.id);
   const members = useMembers(active.id);
   const [recent, setRecent] = useState(null);
@@ -41,16 +44,29 @@ export default function HomeDashboard() {
             : groups.length ? 'Nothing is about to expire. Nice.' : 'Your kitchen is empty. Add what you have to get started.'}
       </p>
 
-      <div className="card-row" style={{ marginTop: 24 }}>
-        <section className="card" style={{ flex: '1 1 420px', padding: 24, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 18 }}>
-          <KitchenTile kitchen={active} size="xl" />
-          <div style={{ flex: '1 1 180px', minWidth: 0 }}>
-            <h2 className="h2">{active.name}</h2>
-            <p className="small" style={{ margin: '4px 0 0', fontSize: 15 }}>{kitchenMeta(active, user.uid)} · {items ? plural(groups.length, 'item') : '…'}</p>
-          </div>
-          <Link to="/kitchen" className="btn btn-primary btn-sm">Open kitchen</Link>
-        </section>
-      </div>
+      <section aria-labelledby="home-kitchens" style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <h2 id="home-kitchens" className="feed-day" style={{ margin: 0 }}>{kitchens.length > 1 ? `Your kitchens (${kitchens.length})` : 'Your kitchen'}</h2>
+        {[active, ...kitchens.filter((k) => k.id !== active.id)].map((k) => {
+          const current = k.id === active.id;
+          return (
+            <div key={k.id} className="card" style={{ padding: 20, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 16, outline: current && kitchens.length > 1 ? '2px solid var(--coral)' : 'none' }}>
+              <KitchenTile kitchen={k} size={current ? 'xl' : 'lg'} />
+              <div style={{ flex: '1 1 180px', minWidth: 0 }}>
+                <h3 className="h2" style={{ fontSize: current ? 26 : 22, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  {k.name}{current && kitchens.length > 1 && <span className="badge" style={{ background: 'var(--coral-tint)', fontFamily: 'Nunito, sans-serif' }}>Current</span>}
+                </h3>
+                <p className="small" style={{ margin: '4px 0 0', fontSize: 15 }}>{kitchenMeta(k, user.uid)}{current && items ? ` · ${plural(groups.length, 'item')}` : ''}</p>
+              </div>
+              <button type="button" className={'btn btn-sm ' + (current ? 'btn-primary' : 'btn-secondary')} onClick={() => open(k)}>Open kitchen</button>
+            </div>
+          );
+        })}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+          <Link to="/kitchen/new" style={{ fontSize: 14 }}>Create a kitchen</Link>
+          <Link to="/kitchen/join" style={{ fontSize: 14 }}>Join with a code</Link>
+          <Link to="/kitchen/removed" style={{ fontSize: 14 }}>Recently removed</Link>
+        </div>
+      </section>
 
       <div style={{ marginTop: 20, display: 'flex', flexWrap: 'wrap', gap: 10 }}>
         <Link to="/kitchen/add" className="pill" style={{ textDecoration: 'none', fontWeight: 800 }}><PlusGlyph size={16} /> Add item</Link>
@@ -60,7 +76,7 @@ export default function HomeDashboard() {
 
       <section aria-labelledby="home-soon" style={{ marginTop: 32, display: 'flex', flexDirection: 'column', gap: 14 }}>
         <h2 id="home-soon" className="h2" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span aria-hidden="true" className="ktile sm" style={{ background: 'var(--coral-tint)' }}><ClockGlyph /></span>Use these soon
+          <span aria-hidden="true" className="ktile sm" style={{ background: 'var(--coral-tint)' }}><ClockGlyph /></span>Use these soon{kitchens.length > 1 ? ` in ${active.name}` : ''}
         </h2>
         {items && soon.length === 0 && <p className="small" style={{ margin: 0, fontSize: 15 }}>Nothing is about to expire.</p>}
         {soon.length > 0 && (

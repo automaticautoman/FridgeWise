@@ -12,6 +12,7 @@ import {
 import { useKitchens, pendingInvite } from '../kitchen/KitchenProvider';
 import { KitchenLayout, useOpenInvite, useInviting } from '../kitchen/KitchenLayout';
 import { describe, KIND_STYLE } from '../kitchen/activityText';
+import { watchRemoved, undoRemoval } from '../lib/items';
 import {
   Dialog, Avatar, KitchenTile, plural, toDate, dayLabel, shortDate, timeAgo, expiresIn,
   BackGlyph, PlusGlyph, DoorGlyph, CheckGlyph, LeaveGlyph, CrownGlyph, InfoGlyph, AlertGlyph,
@@ -488,12 +489,31 @@ export function Activity() {
   return <WithKitchen><ActivityInner /></WithKitchen>;
 }
 
+const REMOVAL_TYPES = ['item-consumed', 'item-wasted', 'item-removed'];
+
 function ActivityInner() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { active } = useKitchens();
   const [entries, setEntries] = useState(null);
   const [filter, setFilter] = useState('all');
+  const [removed, setRemoved] = useState([]);
+  const [restoring, setRestoring] = useState({}); // activity id -> 'busy' | 'done' | error text
   useEffect(() => watchActivity(active.id, setEntries, () => setEntries([]), 100), [active.id]);
+  useEffect(() => watchRemoved(active.id, setRemoved, () => setRemoved([])), [active.id]);
+
+  // Which Recently removed records belong to a removal in the feed. They're
+  // saved in the same write as the feed entry, so they share its exact
+  // timestamp. None left = already put back (or older than 30 days): no button.
+  const recordsFor = (e) => {
+    if (!REMOVAL_TYPES.includes(e.type) || !e.at) return [];
+    const t = toDate(e.at).getTime();
+    return removed.filter((r) => r.name === e.itemName && r.byId === e.actorId && r.at && toDate(r.at).getTime() === t);
+  };
+  const doRestore = async (e, records) => {
+    setRestoring((s) => ({ ...s, [e.id]: 'busy' }));
+    try { await undoRemoval(active, user, profile, records); setRestoring((s) => ({ ...s, [e.id]: 'done' })); }
+    catch (err) { setRestoring((s) => ({ ...s, [e.id]: friendlyError(err) })); }
+  };
 
   const groups = useMemo(() => {
     const out = [];
@@ -533,6 +553,17 @@ function ActivityInner() {
                       <span style={{ fontSize: 13, color: 'var(--muted)' }}>{e.d.where ? `${e.d.where} · ` : ''}{g.day === 'Today' ? timeAgo(e.at) : (e.at ? e.at.toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit' }).toLowerCase() : '')}</span>
                     </span>
                     <span className="badge" style={{ background: s.bg, color: s.fg }}>{s.badge}</span>
+                    {(() => {
+                      const st = restoring[e.id];
+                      if (st === 'done') return <span className="field-ok" style={{ margin: 0, fontSize: 13 }}>Put back</span>;
+                      const records = recordsFor(e);
+                      if (!records.length) return null;
+                      return (
+                        <button type="button" className="ghost-btn" style={{ height: 36, padding: '0 12px', fontSize: 13 }} disabled={st === 'busy'}
+                          aria-label={`Restore ${e.itemName}`} title={typeof st === 'string' && st !== 'busy' ? st : undefined}
+                          onClick={() => doRestore(e, records)}>{st === 'busy' ? '…' : 'Restore'}</button>
+                      );
+                    })()}
                   </li>
                 );
               })}
@@ -540,6 +571,7 @@ function ActivityInner() {
           </div>
         ))}
         {entries && !groups.length && <p style={{ margin: '24px 0 8px', textAlign: 'center', fontSize: 15, color: 'var(--muted)' }}>Nothing like that yet.</p>}
+        <p className="small" style={{ margin: '16px 0 0' }}>Anything taken out can be put back for 30 days. See everything in <Link to="/kitchen/removed">Recently removed</Link>.</p>
       </section>
     </KitchenLayout>
   );

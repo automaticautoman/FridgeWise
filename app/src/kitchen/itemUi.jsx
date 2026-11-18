@@ -96,7 +96,9 @@ export function LevelBars({ level, w = 14 }) {
 
 // ---------- quantity stepper (F20) ----------
 
-export function Stepper({ value, onChange, step = 1, unit, label = 'Amount', size = 40, inputWidth = 52 }) {
+// live: report every typed number straight away (for values that aren't
+// saved, like "how much to take out"), instead of only when you leave the box.
+export function Stepper({ value, onChange, step = 1, unit, label = 'Amount', size = 40, inputWidth = 52, live = false }) {
   const [text, setText] = useState(String(value));
   useEffect(() => { setText(String(value)); }, [value]);
   const commit = (v) => {
@@ -108,7 +110,11 @@ export function Stepper({ value, onChange, step = 1, unit, label = 'Amount', siz
     <div role="group" aria-label={label} style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 2, padding: 3, borderRadius: 999, background: '#fff', border: '1.5px solid #D9D2CB' }}>
       <button type="button" aria-label="Less" style={btn} disabled={value <= 0} onClick={() => commit(Math.max(0, Math.round((value - step) * 1000) / 1000))}>−</button>
       <input aria-label={label} inputMode="decimal" value={text} style={{ width: inputWidth, height: size, border: 'none', textAlign: 'center', fontFamily: 'inherit', fontSize: 16, fontWeight: 800, color: 'var(--cocoa)', background: 'transparent', padding: 0 }}
-        onChange={(e) => setText(e.target.value.replace(/[^0-9.]/g, ''))}
+        onChange={(e) => {
+          const t = e.target.value.replace(/[^0-9.]/g, '');
+          setText(t);
+          if (live && t !== '' && !t.endsWith('.') && Number.isFinite(Number(t))) onChange(Math.max(0, Math.round(Number(t) * 1000) / 1000));
+        }}
         onBlur={() => commit(text)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commit(text); } }} />
       {unit && <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--muted)', paddingRight: 4 }}>{unit}</span>}
       <button type="button" aria-label="More" style={btn} onClick={() => commit(Math.round((value + step) * 1000) / 1000)}>+</button>

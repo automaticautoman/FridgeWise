@@ -139,6 +139,12 @@ export function EnterCode() {
       <div aria-live="polite" style={{ marginTop: 12 }}>
         {note && <p className="field-ok">{note}</p>}
       </div>
+      {/* Codes only go to accounts that exist, and the screen can't say which
+          (so it doesn't reveal who has an account). These are the usual reasons. */}
+      <p className="small" style={{ margin: '16px 0 0', fontSize: 14, lineHeight: 1.5 }}>
+        No code at all? Make sure it's the exact email you signed up with. If you signed up with
+        Google, you don't need a code: <Link to="/signin">sign in with Google</Link> instead.
+      </p>
     </AuthLayout>
   );
 }

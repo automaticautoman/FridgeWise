@@ -11,7 +11,7 @@ import { Dialog, spotStyle, plural, toDate, shortDate, BackGlyph, PlusGlyph, Che
 import { useItems, useMembers, OwnerBadge, LevelBars, expiryInfo, dateLine, keepsAbout, Stepper } from '../kitchen/itemUi';
 import { CATALOG, CATEGORIES, nameKey } from '../lib/catalog';
 import {
-  addItem, updateItem, deleteItem, setAmount, setLevel, takeOut, restore, watchRemoved, watchMyItems,
+  addItem, updateItem, deleteItem, setAmount, setLevel, takeOut, restore, undoRemoval, watchRemoved, watchMyItems,
   defaultsFor, groupKey, byExpiry, todayISO, REMOVED_DAYS
 } from '../lib/items';
 import { UNITS, STEP, START, LEVELS, LEVEL_LABEL, toBase, fromBase, entryUnit, savedAs, formatAmount, takeChoices } from '../lib/units';
@@ -247,7 +247,7 @@ function DeleteDialog({ name, busy, onCancel, onConfirm }) {
   return (
     <Dialog labelledBy="del-h" describedBy="del-d" onClose={busy ? undefined : onCancel} width={460}>
       <h2 id="del-h">Delete {name}?</h2>
-      <p id="del-d" className="lead" style={{ margin: 0, fontSize: 16 }}>Only for things added by mistake. It won't go to Recently removed. If you ate it or threw it out, use “Take some out” instead.</p>
+      <p id="del-d" className="lead" style={{ margin: 0, fontSize: 16 }}>For things added by mistake. You can still put it back from Recently removed for 30 days. If you ate it or threw it out, use “Take some out” instead.</p>
       <div className="dialog-actions">
         <button type="button" className="btn btn-secondary btn-sm" style={{ height: 52 }} onClick={onCancel} disabled={busy}>Keep it</button>
         <button type="button" className="btn btn-danger btn-sm" style={{ height: 52 }} onClick={onConfirm} disabled={busy}>{busy ? <span className="spinner" /> : 'Delete'}</button>
@@ -271,9 +271,23 @@ function ItemDetailBody() {
   const members = useMembers(active.id);
   const [how, setHow] = useState('used');
   const [pick, setPick] = useState(null);
+  const [customVal, setCustomVal] = useState(1); // "Custom amount", in the item's own unit
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
-  const [done, setDone] = useState(null);
+  const [done, setDone] = useState(null); // { text, entries } after a take-out or delete, for Undo
+  const [undoing, setUndoing] = useState(false);
+  const undo = async () => {
+    setUndoing(true); setError(null);
+    try { await undoRemoval(active, user, profile, done.entries); setDone(null); }
+    catch (err) { setError(friendlyError(err)); }
+    setUndoing(false);
+  };
+  const undoBox = done && (
+    <div role="status" className="undo-bar">
+      <span><CheckGlyph size={16} /> {done.text}</span>
+      <button type="button" className="link-btn" onClick={undo} disabled={undoing}>{undoing ? 'Putting it back…' : 'Undo'}</button>
+    </div>
+  );
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const batches = useMemo(() => (items || []).filter((i) => groupKey(i) === key).sort(byExpiry), [items, key]);
@@ -281,7 +295,7 @@ function ItemDetailBody() {
   // Default to a small amount (not "all"), and only once the batches have loaded.
   useEffect(() => {
     if (!batches.length) return;
-    if (!choices.some((c) => c.id === pick)) setPick(choices[Math.min(1, choices.length - 1)].id);
+    if (pick !== 'custom' && !choices.some((c) => c.id === pick)) setPick(choices[Math.min(1, choices.length - 1)].id);
   }, [choices]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!items) return <Loading />;
@@ -290,7 +304,8 @@ function ItemDetailBody() {
       <AppLayout>
         <Link to="/kitchen" className="back"><BackGlyph /> Home</Link>
         <h1 className="title" style={{ marginTop: 8 }}>{done ? 'All gone' : "That item isn't in the kitchen"}</h1>
-        <p className="lead">{done || 'Someone may have used it up or removed it.'} Changed your mind? It's in <Link to="/kitchen/removed">Recently removed</Link>.</p>
+        <p className="lead">{done ? '' : 'Someone may have used it up or removed it. '}You can put it back from <Link to="/kitchen/removed">Recently removed</Link> for {REMOVED_DAYS} days.</p>
+        {undoBox && <div style={{ marginTop: 16, maxWidth: 520 }}>{undoBox}</div>}
         <Link to="/kitchen" className="btn btn-primary btn-sm" style={{ marginTop: 20, alignSelf: 'flex-start' }}>Back to the kitchen</Link>
       </AppLayout>
     );
@@ -304,21 +319,29 @@ function ItemDetailBody() {
   const { bg, Icon } = spotStyle(first.location);
   const choice = choices.find((c) => c.id === pick) || choices[choices.length - 1];
   const verb = { used: 'used', wasted: 'wasted', removed: 'removed' }[how];
-  const ctaAmount = choice.amount == null ? 'it' : choice.id === 'all' ? `all ${formatAmount({ ...amountBatches[0], amount: total })}` : formatAmount({ ...amountBatches[0], amount: choice.amount });
+  // Custom amount: typed in the unit the item is shown in (pieces, g/kg, ml/L), capped at what's there.
+  const customUnit = amountBatches.length ? entryUnit(total, amountBatches[0].unit) : null;
+  const customMax = customUnit ? fromBase(total, customUnit) : 0;
+  const isCustom = pick === 'custom' && !!customUnit;
+  const customBase = isCustom ? toBase(Math.min(Number(customVal) || 0, customMax), customUnit).amount : null;
+  const takeAmount = isCustom ? customBase : choice.amount;
+  const takeAll = isCustom ? customBase >= total : (choice.amount == null || choice.id === 'all');
+  const ctaAmount = isCustom
+    ? (takeAll ? `all ${formatAmount({ ...amountBatches[0], amount: total })}` : formatAmount({ ...amountBatches[0], amount: customBase }))
+    : choice.amount == null ? 'it' : choice.id === 'all' ? `all ${formatAmount({ ...amountBatches[0], amount: total })}` : formatAmount({ ...amountBatches[0], amount: choice.amount });
   const single = batches.length === 1;
 
   const take = async () => {
     setBusy(true); setError(null);
     try {
-      const all = choice.amount == null || choice.id === 'all';
-      await takeOut(active, user, profile, batches, how, all ? null : choice.amount);
-      setDone(`Marked ${ctaAmount} as ${verb}.`);
+      const entries = await takeOut(active, user, profile, batches, how, takeAll ? null : takeAmount);
+      setDone({ text: `Marked ${ctaAmount} as ${verb}.`, entries });
       setBusy(false);
     } catch (err) { setError(friendlyError(err)); setBusy(false); }
   };
   const remove = async () => {
     setBusy(true);
-    try { await deleteItem(active, user, profile, first); navigate('/kitchen', { replace: true }); }
+    try { const entries = await deleteItem(active, user, profile, first); setDone({ text: `Deleted ${first.name}.`, entries }); setConfirmDelete(false); setBusy(false); }
     catch (err) { setError(friendlyError(err)); setBusy(false); setConfirmDelete(false); }
   };
 
@@ -345,6 +368,7 @@ function ItemDetailBody() {
         )}
       </div>
       {first.note && <p className="note" style={{ marginTop: 16 }}><InfoGlyph />{first.note}</p>}
+      <Link to="/kitchen/removed" style={{ alignSelf: 'flex-start', marginTop: 12, fontSize: 14 }}>Recently removed</Link>
 
       <div style={{ marginTop: 28, display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'flex-start' }}>
         <section aria-labelledby="b-h" className="card" style={{ flex: '1 1 420px', minWidth: 0, padding: 28, display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -358,7 +382,7 @@ function ItemDetailBody() {
             <span className="badge" style={{ height: 32, fontSize: 14, background: e.bg, color: e.fg }}>{earliest}</span>
           </div>
           <h2 id="b-h" className="feed-day" style={{ margin: '8px 0 0' }}>{plural(batches.length, 'batch', 'batches')}</h2>
-          {batches.map((b, i) => <BatchRow key={b.id} b={b} n={i + 1} single={single} kitchen={active} user={user} profile={profile} onError={setError} />)}
+          {batches.map((b, i) => <BatchRow key={b.id} b={b} n={i + 1} single={single} kitchen={active} user={user} profile={profile} onError={setError} onDeleted={(entries) => setDone({ text: `Deleted a batch of ${b.name}.`, entries })} />)}
           <Link to={`/kitchen/item/new?group=${encodeURIComponent(key)}`} className="dashed-row" style={{ justifyContent: 'center', minHeight: 52 }}><PlusGlyph size={18} /> Add another batch</Link>
         </section>
 
@@ -372,12 +396,24 @@ function ItemDetailBody() {
             <span className="label">How much?</span>
             <div role="radiogroup" aria-label="How much?" style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {choices.map((c) => <button key={c.id} type="button" role="radio" aria-checked={pick === c.id} className="filter-btn" aria-pressed={pick === c.id} onClick={() => setPick(c.id)}>{c.label}</button>)}
+              {customUnit && (
+                <button type="button" role="radio" aria-checked={isCustom} className="filter-btn" aria-pressed={isCustom}
+                  onClick={() => { setPick('custom'); setCustomVal((v) => Math.min(Math.max(Number(v) || 0, STEP[customUnit] > 1 ? STEP[customUnit] : 1), customMax)); }}>Custom amount</button>
+              )}
             </div>
+            {isCustom && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10 }}>
+                <Stepper label="How much to take out" value={Math.min(Number(customVal) || 0, customMax)} step={customUnit === 'pieces' ? 1 : STEP[customUnit]}
+                  unit={customUnit === 'pieces' ? (amountBatches[0].noun || 'pcs') : customUnit === 'l' ? 'L' : customUnit} inputWidth={64} live
+                  onChange={(v) => setCustomVal(Math.min(v, customMax))} />
+                <span className="small">of {formatAmount({ ...amountBatches[0], amount: total })}</span>
+              </div>
+            )}
             {batches.length > 1 && <span style={{ fontSize: 13, color: 'var(--muted)' }}>Taken from the batch that expires first.</span>}
           </div>
           {error && <ErrorAlert>{error}</ErrorAlert>}
-          {done && <span role="status" className="chip-ok"><CheckGlyph size={16} /> {done}</span>}
-          <button type="button" className="btn btn-primary" style={{ height: 54, fontSize: 16 }} disabled={busy} onClick={take}>
+          {undoBox}
+          <button type="button" className="btn btn-primary" style={{ height: 54, fontSize: 16 }} disabled={busy || (isCustom && !(customBase > 0))} onClick={take}>
             {busy ? <span className="spinner" /> : `Mark ${ctaAmount} as ${verb}`}
           </button>
         </section>
@@ -387,7 +423,7 @@ function ItemDetailBody() {
   );
 }
 
-function BatchRow({ b, n, single, kitchen, user, profile, onError }) {
+function BatchRow({ b, n, single, kitchen, user, profile, onError, onDeleted }) {
   const e = expiryInfo(b.expiry);
   const urgent = e.d !== null && e.d <= 0;
   const added = toDate(b.addedAt);
@@ -414,13 +450,13 @@ function BatchRow({ b, n, single, kitchen, user, profile, onError }) {
         <Stepper label={`Batch ${n} amount`} value={fromBase(Number(b.amount) || 0, eu)} step={STEP[eu]} unit={eu === 'pieces' ? (b.noun || 'pcs') : eu === 'l' ? 'L' : eu}
           onChange={(v) => { if (v > 0) save(() => setAmount(kitchen, user, profile, b, toBase(v, eu).amount)); }} />
       )}
-      <BatchMenu b={b} n={n} kitchen={kitchen} user={user} profile={profile} onError={onError} />
+      <BatchMenu b={b} n={n} kitchen={kitchen} user={user} profile={profile} onError={onError} onDeleted={onDeleted} />
     </div>
   );
 }
 
 // S7 wireframe: "…" on each batch, with Edit and Delete for that batch only.
-function BatchMenu({ b, n, kitchen, user, profile, onError }) {
+function BatchMenu({ b, n, kitchen, user, profile, onError, onDeleted }) {
   const [open, setOpen] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -434,7 +470,7 @@ function BatchMenu({ b, n, kitchen, user, profile, onError }) {
   }, [open]);
   const remove = async () => {
     setBusy(true);
-    try { await deleteItem(kitchen, user, profile, b); setConfirm(false); }
+    try { const entries = await deleteItem(kitchen, user, profile, b); setConfirm(false); onDeleted(entries); }
     catch (err) { onError(friendlyError(err)); setBusy(false); setConfirm(false); }
   };
   return (
@@ -468,7 +504,7 @@ function ago(d) {
 
 function RemovedBody() {
   const { user, profile } = useAuth();
-  const { active } = useKitchens();
+  const { active, kitchens } = useKitchens();
   const [entries, setEntries] = useState(null);
   const [back, setBack] = useState({}); // restored here: id -> entry
   const [error, setError] = useState(null);
@@ -493,6 +529,7 @@ function RemovedBody() {
         <Link to="/kitchen" className="back"><BackGlyph /> Home</Link>
         <h1 className="title" style={{ marginTop: 8 }}>Recently removed</h1>
         <p className="lead">Took something out by mistake? Put it back. Items stay here for {REMOVED_DAYS} days.</p>
+        {kitchens.length > 1 && <p className="small" style={{ margin: '6px 0 0', fontSize: 15 }}>Showing <strong>{active.name}</strong>. Switch kitchens to see the others.</p>}
         {error && <div style={{ marginTop: 16 }}><ErrorAlert>{error}</ErrorAlert></div>}
         {!entries && <div role="status" aria-label="Loading" style={{ padding: 48, display: 'flex', justifyContent: 'center' }}><span className="spinner" /></div>}
         {entries && (
@@ -501,7 +538,7 @@ function RemovedBody() {
             {rows.map((r) => {
               const at = toDate(r.at);
               const left = Math.max(0, REMOVED_DAYS - Math.floor((Date.now() - (at ? at.getTime() : Date.now())) / 864e5));
-              const [tag, tbg, tfg] = TAGS[r.how] || TAGS.removed;
+              const [tag, tbg, tfg] = r.mistake ? ['Deleted', '#F3ECE4', '#5E5552'] : (TAGS[r.how] || TAGS.removed);
               const st = back[r.id];
               return (
                 <li key={r.id} className="removed-row" style={{ background: st && st.restored ? '#EAF7EE' : 'transparent' }}>

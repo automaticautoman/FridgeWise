@@ -297,3 +297,6 @@ input:focus-visible + .tickbox { outline: 3px solid var(--cocoa); outline-offset
 .batch-menu a, .batch-menu button { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border: none; border-radius: 12px; background: transparent; font: inherit; font-size: 14px; font-weight: 800; color: var(--cocoa); text-decoration: none; cursor: pointer; text-align: left; }
 .batch-menu .danger-text { color: #8E2C26; }
 .batch-menu a:hover, .batch-menu button:hover { background: var(--cream); }
+
+.undo-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: 16px; background: var(--mint-tint); font-size: 14px; font-weight: 800; }
+.undo-bar span { display: flex; align-items: center; gap: 8px; }

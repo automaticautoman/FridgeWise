@@ -181,16 +181,30 @@ export async function setLevel(kitchen, user, profile, item, level) {
   await batch.commit();
 }
 
-// F23: "Delete (added by mistake)". No recently-removed entry: it never really existed.
+// F23: "Delete (added by mistake)". It still goes to Recently removed, so
+// anything that leaves the kitchen can be put back for 30 days (F25).
 export async function deleteItem(kitchen, user, profile, item) {
   const batch = writeBatch(db);
   batch.delete(doc(itemsCol(kitchen.id), item.id));
+  const ref = doc(removedCol(kitchen.id));
+  batch.set(ref, removalEntry(item, 'removed', item.mode === 'level' ? null : Number(item.amount) || 0, user, profile, true));
   logActivity(batch, kitchen.id, user, profile, 'item-removed', item, 'added by mistake');
   await batch.commit();
+  return [{ id: ref.id, ...removalEntry(item, 'removed', item.mode === 'level' ? null : Number(item.amount) || 0, user, profile, true) }];
 }
 
 const SNAPSHOT = ['name', 'nameKey', 'catalogId', 'category', 'location', 'mode', 'unit', 'noun', 'level', 'expiry', 'dateType', 'ownerId', 'shared', 'note', 'addedBy', 'addedByName'];
 const snapshot = (b) => Object.fromEntries(SNAPSHOT.map((k) => [k, b[k] === undefined ? null : b[k]]));
+
+// One Recently removed record (kitchens/{id}/removed): enough to put it back.
+function removalEntry(b, how, take, user, profile, mistake = false) {
+  return {
+    itemId: b.id, name: b.name, nameKey: b.nameKey, location: b.location, how,
+    mode: b.mode, amount: take, unit: b.unit, noun: b.noun || null, level: b.level || null,
+    byId: user.uid, byName: who(user, profile), at: serverTimestamp(), item: snapshot(b),
+    ...(mistake ? { mistake: true } : {})
+  };
+}
 
 // F24: take some (amount) or all (amount = null) of an item out, from the
 // batch that expires first. how: 'used' | 'wasted' | 'removed'.
@@ -199,6 +213,7 @@ export async function takeOut(kitchen, user, profile, batches, how, amount = nul
   const batch = writeBatch(db);
   let left = amount == null ? Infinity : amount;
   let taken = 0;
+  const entries = []; // returned so the screen can offer Undo
   for (const b of sorted) {
     if (left <= 0) break;
     const has = b.mode === 'level' ? null : Number(b.amount) || 0;
@@ -206,11 +221,10 @@ export async function takeOut(kitchen, user, profile, batches, how, amount = nul
     const all = has == null || take >= has;
     if (all) batch.delete(doc(itemsCol(kitchen.id), b.id));
     else batch.update(doc(itemsCol(kitchen.id), b.id), { amount: increment(-take), updatedAt: serverTimestamp(), updatedBy: user.uid });
-    batch.set(doc(removedCol(kitchen.id)), {
-      itemId: b.id, name: b.name, nameKey: b.nameKey, location: b.location, how,
-      mode: b.mode, amount: take, unit: b.unit, noun: b.noun || null, level: b.level || null,
-      byId: user.uid, byName: who(user, profile), at: serverTimestamp(), item: snapshot(b)
-    });
+    const ref = doc(removedCol(kitchen.id));
+    const entry = removalEntry(b, how, take, user, profile);
+    batch.set(ref, entry);
+    entries.push({ id: ref.id, ...entry });
     if (take != null) { left -= take; taken += take; }
   }
   const first = sorted[0];
@@ -218,6 +232,12 @@ export async function takeOut(kitchen, user, profile, batches, how, amount = nul
   const qty = first.mode === 'level' ? null : formatAmount({ ...first, amount: taken });
   logActivity(batch, kitchen.id, user, profile, type, first, qty);
   await batch.commit();
+  return entries;
+}
+
+// "Undo" straight after taking out or deleting: put every part back.
+export async function undoRemoval(kitchen, user, profile, entries) {
+  for (const e of entries) await restore(kitchen, user, profile, e);
 }
 
 // F25: put a recently removed entry back.

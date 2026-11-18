@@ -1,0 +1,166 @@
+rules_version = '2';
+
+// Epic 1: user profiles. Epic 2: kitchens, members and activity.
+// Item fields are validated in Epic 3 and admin rules arrive in Epic 11.
+// Anything not matched below is denied.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // Fields a user may write on their own profile. "role" and similar
+    // admin fields are deliberately missing, so a user can never make
+    // themselves an admin from the client (F62).
+    function allowedKeys() {
+      return ['name', 'email', 'createdAt', 'updatedAt', 'onboarding', 'notifications', 'dietary', 'activeKitchenId'];
+    }
+
+    // The kitchen picked in the switcher (F07). Only a pointer: what the
+    // user can read is still decided by membership below.
+    function validActiveKitchen(d) {
+      return !('activeKitchenId' in d) || d.activeKitchenId == null
+        || (d.activeKitchenId is string && d.activeKitchenId.size() <= 40);
+    }
+
+    function validName(d) {
+      return d.name is string && d.name.size() >= 1 && d.name.size() <= 60;
+    }
+
+    function validDietary(d) {
+      return !('dietary' in d) || (
+        d.dietary is map
+        && d.dietary.keys().hasOnly(['vegetarian', 'halal', 'allergens'])
+        && (!('vegetarian' in d.dietary) || d.dietary.vegetarian is bool)
+        && (!('halal' in d.dietary) || d.dietary.halal is bool)
+        && (!('allergens' in d.dietary) || (d.dietary.allergens is list && d.dietary.allergens.size() <= 20))
+      );
+    }
+
+    function validProfile(d) {
+      return d.keys().hasOnly(allowedKeys())
+        && validName(d)
+        && d.email == request.auth.token.email
+        && validDietary(d)
+        && validActiveKitchen(d);
+    }
+
+    // ---------- Epic 2: kitchens (F06–F13, NFR12) ----------
+    // All membership changes (create, join, leave, remove, transfer, invites)
+    // run on the server (api/kitchens.js), so clients never write these
+    // documents directly. Clients only read kitchens they belong to.
+
+    function kitchen(kitchenId) {
+      return get(/databases/$(database)/documents/kitchens/$(kitchenId)).data;
+    }
+
+    function isMember(kitchenId) {
+      return signedIn() && request.auth.uid in kitchen(kitchenId).memberIds;
+    }
+
+    // Item events members write themselves from Epic 3 on. Membership
+    // events (joined, left, removed, owner changed) come from the server.
+    function itemActivityTypes() {
+      return ['item-added', 'item-edited', 'item-consumed', 'item-wasted', 'item-removed', 'item-restored'];
+    }
+
+    // An item batch (F18): only the name is required from the person, the
+    // app fills the rest. The owner must be a member of the kitchen (F27).
+    function validItem(kitchenId, d) {
+      return d.keys().hasOnly(['name', 'nameKey', 'catalogId', 'category', 'location', 'mode', 'amount', 'unit', 'noun',
+                               'level', 'expiry', 'dateType', 'ownerId', 'shared', 'note', 'addedBy', 'addedByName',
+                               'addedAt', 'updatedAt', 'updatedBy'])
+        && d.name is string && d.name.size() >= 1 && d.name.size() <= 60
+        && d.location is string && d.location.size() >= 1 && d.location.size() <= 24
+        && d.mode in ['amount', 'level']
+        && (d.mode == 'level' ? d.level in ['low', 'half', 'full'] : (d.amount is number && d.amount >= 0 && d.amount < 1000000))
+        && d.unit in ['g', 'ml', 'pieces']
+        && (d.expiry == null || (d.expiry is string && d.expiry.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')))
+        && d.dateType in ['best-before', 'use-by']
+        && d.ownerId in kitchen(kitchenId).memberIds
+        && d.shared is bool
+        && (!('note' in d) || (d.note is string && d.note.size() <= 200))
+        && d.addedBy is string;
+    }
+
+    match /kitchens/{kitchenId} {
+      // Works for single reads and for the "my kitchens" query, which must
+      // filter on memberIds array-contains the user's uid (F07).
+      allow read: if signedIn() && request.auth.uid in resource.data.memberIds;
+      allow write: if false;
+
+      match /members/{memberId} {
+        allow read: if isMember(kitchenId);
+        allow write: if false;
+      }
+
+      match /activity/{entryId} {
+        allow read: if isMember(kitchenId);
+        allow create: if isMember(kitchenId)
+          && request.resource.data.keys().hasOnly(['type', 'actorId', 'actorName', 'itemId', 'itemName', 'location', 'quantity', 'at'])
+          && request.resource.data.type in itemActivityTypes()
+          && request.resource.data.actorId == request.auth.uid
+          && request.resource.data.at == request.time;
+        allow update: if false;
+        // Only "Undo" straight after adding an item removes its own entry.
+        allow delete: if isMember(kitchenId) && resource.data.actorId == request.auth.uid
+          && resource.data.type == 'item-added';
+      }
+
+      // Epic 3. One document per batch (src/lib/items.js). F12: every
+      // member sees and can change the kitchen's items, and no one else can.
+      match /items/{itemId} {
+        allow read: if isMember(kitchenId);
+        allow create: if isMember(kitchenId) && validItem(kitchenId, request.resource.data);
+        allow update: if isMember(kitchenId) && validItem(kitchenId, request.resource.data)
+          && request.resource.data.addedBy == resource.data.addedBy;
+        allow delete: if isMember(kitchenId);
+      }
+
+      // F24/F25: what was taken out, kept 30 days so it can be put back.
+      match /removed/{entryId} {
+        allow read: if isMember(kitchenId);
+        allow create: if isMember(kitchenId)
+          && request.resource.data.byId == request.auth.uid
+          && request.resource.data.how in ['used', 'wasted', 'removed']
+          && request.resource.data.name is string && request.resource.data.name.size() <= 60
+          && request.resource.data.at == request.time;
+        allow delete: if isMember(kitchenId);
+        allow update: if false;
+      }
+
+      // kitchens/{id}/private/* (current invite code) is server only:
+      // no rule matches it, so it is denied.
+    }
+
+    // invites/{code} and joinAttempts/{uid} are server only (no rules = denied).
+
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid)
+        && validProfile(request.resource.data)
+        && request.resource.data.createdAt == request.time;
+      allow update: if isOwner(uid)
+        && validProfile(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt;
+      // Account deletion is F61 (Epic 10) and will run server-side.
+      allow delete: if false;
+
+      // F15/F16: what this person adds and how often, and their own custom items.
+      match /myItems/{key} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+
+    // Password reset codes (F03). Only the server (Admin SDK, which skips
+    // these rules) may touch them. Clients can never read or write them.
+    match /passwordResetOtps/{key} {
+      allow read, write: if false;
+    }
+  }
+}

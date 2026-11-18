@@ -1,0 +1,35 @@
+{
+  "name": "fridgewise",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "emulators": "firebase emulators:start --only auth,firestore --project demo-fridgewise",
+    "emulators:auth": "firebase emulators:start --only auth --project demo-fridgewise",
+    "dev:emu": "vite --mode emulator",
+    "dev:emu:nojava": "vite --mode emulator-nojava",
+    "test:rules": "firebase emulators:exec --config firebase.test.json --only firestore --project demo-fridgewise \"vitest run tests/rules\"",
+    "test:e2e": "firebase emulators:exec --config firebase.test.json --only auth --project demo-fridgewise \"node tests/e2e/run.mjs\"",
+    "check:email": "node scripts/check-email.mjs",
+    "test:kitchens": "node tests/kitchens/run.mjs"
+  },
+  "dependencies": {
+    "firebase": "^11.1.0",
+    "firebase-admin": "^13.10.0",
+    "nodemailer": "^6.10.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "firebase-tools": "^13.29.1",
+    "vite": "^5.4.11",
+    "vite-plugin-pwa": "^0.21.1",
+    "vitest": "^2.1.8"
+  }
+}

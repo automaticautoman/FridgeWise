@@ -98,6 +98,14 @@ Screens built from the `epic3-inventory-quick-entry` mockups: Home inventory (`/
 
 Not in Epic 3 (later epics): the separate Expired section and reminder windows (Epic 4; for now "Use these soon" shows items expiring within 3 days, and expired ones are labelled "Expired"), low-stock thresholds and staples (Epic 6), and clearing removals older than 30 days from the database (they're hidden after 30 days).
 
+## Check your setup
+
+After filling in `.env.local`, run `npm run check:firebase`. It checks the browser keys, the service-account key, the OTP secret, that Authentication and Firestore are reachable, and that the email login works. It prints only OK/FIX lines, never the secrets.
+
+## Deploy on Vercel
+
+This app lives in the `app/` folder of the repo, so when importing the repo in Vercel set **Root Directory** to `app`. Framework preset: Vite. Add every variable from `.env.local` under Project Settings > Environment Variables, then add the Vercel domain to Firebase > Authentication > Settings > Authorized domains.
+
 ## Not getting the reset code?
 
 Run the checker. It reads the same env files as the dev server and tells you which step is broken:

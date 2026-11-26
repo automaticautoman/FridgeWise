@@ -14,7 +14,8 @@
     "test:rules": "firebase emulators:exec --config firebase.test.json --only firestore --project demo-fridgewise \"vitest run tests/rules\"",
     "test:e2e": "firebase emulators:exec --config firebase.test.json --only auth --project demo-fridgewise \"node tests/e2e/run.mjs\"",
     "check:email": "node scripts/check-email.mjs",
-    "test:kitchens": "node tests/kitchens/run.mjs"
+    "test:kitchens": "node tests/kitchens/run.mjs",
+    "check:firebase": "node scripts/check-firebase.mjs"
   },
   "dependencies": {
     "firebase": "^11.1.0",

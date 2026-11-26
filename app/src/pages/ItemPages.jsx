@@ -8,7 +8,7 @@ import { useAuth } from '../auth/AuthProvider';
 import { friendlyError } from '../auth/errors';
 import { useKitchens } from '../kitchen/KitchenProvider';
 import { Dialog, spotStyle, plural, toDate, shortDate, BackGlyph, PlusGlyph, CheckGlyph, Svg } from '../kitchen/kitchenUi';
-import { useItems, useMembers, OwnerBadge, LevelBars, expiryInfo, dateLine, keepsAbout, Stepper } from '../kitchen/itemUi';
+import { useItems, useMembers, OwnerBadge, LevelBars, expiryInfo, dateLine, keepsAbout, Stepper, ExtraFields } from '../kitchen/itemUi';
 import { CATALOG, CATEGORIES, nameKey } from '../lib/catalog';
 import {
   addItem, updateItem, deleteItem, setAmount, setLevel, takeOut, restore, undoRemoval, watchRemoved, watchMyItems,
@@ -58,7 +58,8 @@ function ItemForm({ editing = false }) {
     if (from) { const c = CATALOG.find((x) => x.id === from); return c ? defaultsFor(c, active, user) : 'missing'; }
     const my = params.get('my');
     if (my) { if (!mine) return null; const m = mine.find((x) => x.id === my); return m ? defaultsFor(m, active, user) : 'missing'; }
-    return defaultsFor({ name: params.get('name') || '', location: params.get('location'), mode: 'amount', amount: 1, unit: 'pieces' }, active, user);
+    return defaultsFor({ name: params.get('name') || '', location: params.get('location'), mode: 'amount', amount: 1, unit: 'pieces',
+      brand: params.get('brand') || null, calories: params.get('calories') || null }, active, user);
   }, [editing, id, items, mine, params, active, user]);
 
   if (!source) return <Loading />;
@@ -90,7 +91,9 @@ function ItemFormBody({ source, editing, kitchen, user, profile, members, naviga
     category: source.category || 'Other',
     location: spots.includes(source.location) ? source.location : spots[0],
     owner: source.shared ? 'shared' : source.ownerId === user.uid || !source.ownerId ? 'mine' : source.ownerId,
-    note: source.note || ''
+    note: source.note || '',
+    brand: source.brand || '',
+    calories: source.calories ?? ''
   });
   const [someoneElse, setSomeoneElse] = useState(!['mine', 'shared'].includes(f.owner));
   const [error, setError] = useState(null);
@@ -110,7 +113,7 @@ function ItemFormBody({ source, editing, kitchen, user, profile, members, naviga
       amount: base.amount, unit: base.unit, noun: base.unit === 'pieces' ? f.noun : null, level: f.mode === 'level' ? f.level : null,
       expiry: f.expiry || null, dateType: f.dateType,
       ownerId: f.owner === 'mine' || f.owner === 'shared' ? (editing && source.ownerId && f.owner === 'shared' ? source.ownerId : user.uid) : f.owner,
-      shared: f.owner === 'shared', note: f.note
+      shared: f.owner === 'shared', note: f.note, brand: f.brand, calories: f.calories
     };
   };
 
@@ -230,6 +233,8 @@ function ItemFormBody({ source, editing, kitchen, user, profile, members, naviga
             <label htmlFor="note" className="label">Note <span style={{ fontWeight: 600, color: 'var(--muted)' }}>(optional)</span></label>
             <input id="note" className="input" type="text" maxLength={200} style={{ height: 52 }} placeholder="e.g. for Friday's biryani" value={f.note} onChange={(e) => set('note', e.target.value)} />
           </div>
+
+          <ExtraFields value={{ brand: f.brand, calories: f.calories }} onChange={(v) => setF((x) => ({ ...x, brand: v.brand, calories: v.calories }))} idPrefix="item" />
 
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 12 }}>
             {editing && <button type="button" className="ghost-btn danger-text" style={{ height: 52, marginRight: 'auto' }} onClick={() => setConfirmDelete(true)}><TrashGlyph /> Delete (added by mistake)</button>}
@@ -356,6 +361,8 @@ function ItemDetailBody() {
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               <span className="badge" style={{ background: '#E3F3FB', fontSize: 13 }}>{first.location}</span>
               <span className="badge" style={{ background: '#F3ECE4', fontSize: 13 }}>{first.category}</span>
+              {first.brand && <span className="badge" style={{ background: '#EDE6FB', fontSize: 13 }}>{first.brand}</span>}
+              {first.calories != null && <span className="badge" style={{ background: '#FFF3C4', color: '#5C4300', fontSize: 13 }}>{first.calories} kcal / serving</span>}
               {active.type === 'shared' && <OwnerBadge item={first} members={members} size={28} />}
             </div>
           </div>

@@ -180,6 +180,11 @@ try {
   await denied('item owner must be a member', addDoc(collection(ali.db, 'kitchens', kid, 'items'), item(zed.uid, { name: 'Bad' })));
   await denied('item needs a name', addDoc(collection(ali.db, 'kitchens', kid, 'items'), item(ali.uid, { name: '' })));
   await denied('no unknown fields on items', addDoc(collection(ali.db, 'kitchens', kid, 'items'), { ...item(ali.uid, { name: 'X' }), price: 5 }));
+  await allowed('brand and calories are optional extras', addDoc(collection(ali.db, 'kitchens', kid, 'items'), item(ali.uid, { name: 'Milk', brand: "Olper's", calories: 120 })));
+  await allowed('brand and calories can be left empty', addDoc(collection(ali.db, 'kitchens', kid, 'items'), item(ali.uid, { name: 'Milk', brand: null, calories: null })));
+  await denied('calories must be a whole positive number', addDoc(collection(ali.db, 'kitchens', kid, 'items'), item(ali.uid, { name: 'X', calories: -5 })));
+  await denied('calories must be a number', addDoc(collection(ali.db, 'kitchens', kid, 'items'), item(ali.uid, { name: 'X', calories: 'lots' })));
+  await denied('brand is short text', addDoc(collection(ali.db, 'kitchens', kid, 'items'), item(ali.uid, { name: 'X', brand: 'x'.repeat(61) })));
   await denied('bad expiry format', addDoc(collection(ali.db, 'kitchens', kid, 'items'), item(ali.uid, { name: 'X', expiry: 'tomorrow' })));
   await allowed('level items need no amount', addDoc(collection(ali.db, 'kitchens', kid, 'items'), item(ali.uid, { name: 'Rice', mode: 'level', level: 'half', amount: null, shared: true })));
   await denied('cannot change who added an item', updateDoc(doc(sara.db, 'kitchens', kid, 'items', 'ali-eggs'), { addedBy: sara.uid }));

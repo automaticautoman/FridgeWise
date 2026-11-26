@@ -9,7 +9,7 @@ import { friendlyError } from '../auth/errors';
 import { useKitchens } from '../kitchen/KitchenProvider';
 import { KitchenLayout } from '../kitchen/KitchenLayout';
 import { spotStyle, plural, BackGlyph, PlusGlyph, CheckGlyph, Svg } from '../kitchen/kitchenUi';
-import { useItems, useMembers, ExpiryBadge, OwnerBadge, LevelBars, expiryInfo, keepsAbout, Stepper } from '../kitchen/itemUi';
+import { useItems, useMembers, ExpiryBadge, OwnerBadge, LevelBars, expiryInfo, keepsAbout, Stepper, ExtraFields } from '../kitchen/itemUi';
 import { CATALOG, searchCatalog, closest, nameKey } from '../lib/catalog';
 import { addItem, addMany, undoAdd, defaultsFor, groupItems, byExpiry, watchMyItems } from '../lib/items';
 import { formatAmount, LEVEL_LABEL } from '../lib/units';
@@ -33,6 +33,11 @@ export function InventoryHome() {
 }
 
 function groupSub(g) {
+  const brand = g.first && g.first.brand ? ` · ${g.first.brand}` : '';
+  return groupSubBase(g) + brand;
+}
+
+function groupSubBase(g) {
   if (g.mode === 'level') return 'Tracked by level';
   const amount = formatAmount({ mode: 'amount', amount: g.total, unit: g.unit, noun: g.noun });
   if (g.batches.length < 2) return amount;
@@ -180,6 +185,7 @@ function AddItemBody() {
   const [error, setError] = useState(null);
   const [customOpen, setCustomOpen] = useState(false);
   const [customSpot, setCustomSpot] = useState(null);
+  const [extras, setExtras] = useState({ brand: '', calories: '' }); // optional
   const mineLive = useMyItems();
   const mine = mineLive || [];
   const input = useRef(null);
@@ -203,7 +209,7 @@ function AddItemBody() {
     ].filter(([, list]) => list.length) });
   }, [mineLive, recent]);
 
-  useEffect(() => { setParams(q ? { q } : {}, { replace: true }); setCustomOpen(false); }, [q]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setParams(q ? { q } : {}, { replace: true }); setCustomOpen(false); setExtras({ brand: '', calories: '' }); }, [q]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const results = q.trim() ? searchCatalog(q, mine.map(myAsEntry)).slice(0, 8) : [];
   const showCustom = q.trim() && (results.length === 0 || customOpen);
@@ -235,7 +241,7 @@ function AddItemBody() {
     try {
       await addItem(active, user, profile, {
         name: customName, category: 'Other', location: customLoc, mode: 'amount', amount: 1, unit: 'pieces',
-        expiry: null, dateType: 'best-before', ownerId: user.uid, shared: false
+        expiry: null, dateType: 'best-before', ownerId: user.uid, shared: false, brand: extras.brand, calories: extras.calories
       }, { custom: true });
       navigate('/kitchen');
     } catch (e) { setError(friendlyError(e)); }
@@ -314,9 +320,10 @@ function AddItemBody() {
                 {spots.map((s) => <button key={s} type="button" role="radio" aria-checked={customLoc === s} aria-pressed={customLoc === s} className="pill" onClick={() => setCustomSpot(s)}>{s}</button>)}
               </div>
             </fieldset>
+            <ExtraFields value={extras} onChange={setExtras} idPrefix="custom" />
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
               <button type="button" className="btn btn-primary" style={{ flex: '1 1 240px', height: 54, fontSize: 16 }} onClick={addCustom}><PlusGlyph size={18} /> Add “{customName}” to {customLoc}</button>
-              <Link to={`/kitchen/item/new?name=${encodeURIComponent(customName)}&location=${encodeURIComponent(customLoc)}`} className="btn btn-secondary" style={{ height: 54, fontSize: 16 }}>Add details first</Link>
+              <Link to={`/kitchen/item/new?name=${encodeURIComponent(customName)}&location=${encodeURIComponent(customLoc)}&brand=${encodeURIComponent(extras.brand)}&calories=${encodeURIComponent(extras.calories)}`} className="btn btn-secondary" style={{ height: 54, fontSize: 16 }}>Add details first</Link>
             </div>
             <span className="small">It'll show up in “You often add” next time. No expiry date is set unless you add one.</span>
           </section>

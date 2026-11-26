@@ -7,7 +7,8 @@
 //   mode ('amount' | 'level'), amount (base units) | null, unit ('g' | 'ml' | 'pieces'),
 //   noun (e.g. 'loaf') | null, level ('low' | 'half' | 'full') | null,
 //   expiry ('YYYY-MM-DD') | null, dateType ('best-before' | 'use-by'),
-//   ownerId, shared, note, addedBy, addedByName, addedAt, updatedAt, updatedBy
+//   ownerId, shared, note, brand | null, calories (kcal per serving) | null,
+//   addedBy, addedByName, addedAt, updatedAt, updatedBy
 //
 // kitchens/{kitchenId}/removed/{id}: what was taken out (F24/F25), kept 30
 // days so it can be put back. how: 'used' | 'wasted' | 'removed'. Wasted
@@ -77,7 +78,9 @@ export function defaultsFor(entry, kitchen, user) {
     dateType: entry.dateType || 'best-before',
     ownerId: user.uid,
     shared: false,
-    note: ''
+    note: '',
+    brand: entry.brand || null,
+    calories: entry.calories ?? null
   };
 }
 
@@ -101,6 +104,7 @@ function rememberForMe(batch, user, item, custom) {
     amount: item.amount, unit: item.unit, noun: item.noun, dateType: item.dateType,
     shelfDays: item.expiry ? Math.max(1, daysLeft(item.expiry)) : null,
     catalogId: item.catalogId || null, custom: !!custom,
+    brand: item.brand || null, calories: item.calories ?? null,
     count: increment(1), lastAddedAt: serverTimestamp()
   }, { merge: true });
 }
@@ -120,8 +124,18 @@ const clean = (f) => ({
   dateType: f.dateType === 'use-by' ? 'use-by' : 'best-before',
   ownerId: f.ownerId,
   shared: !!f.shared,
-  note: String(f.note || '').slice(0, 200)
+  note: String(f.note || '').slice(0, 200),
+  // Optional extras (both can be left empty): brand, and calories in kcal per serving.
+  brand: String(f.brand || '').replace(/\s+/g, ' ').trim().slice(0, 60) || null,
+  calories: cleanCalories(f.calories)
 });
+
+// Empty / not a number -> null. Otherwise a whole number of kcal, 0 to 10000.
+export function cleanCalories(v) {
+  if (v === null || v === undefined || String(v).trim() === '') return null;
+  const n = Math.round(Number(v));
+  return Number.isFinite(n) && n >= 0 && n <= 10000 ? n : null;
+}
 
 // F14/F16/F18. Resolves to { id, activityId } (both needed for Undo).
 export async function addItem(kitchen, user, profile, fields, { custom = false } = {}) {
@@ -193,7 +207,7 @@ export async function deleteItem(kitchen, user, profile, item) {
   return [{ id: ref.id, ...removalEntry(item, 'removed', item.mode === 'level' ? null : Number(item.amount) || 0, user, profile, true) }];
 }
 
-const SNAPSHOT = ['name', 'nameKey', 'catalogId', 'category', 'location', 'mode', 'unit', 'noun', 'level', 'expiry', 'dateType', 'ownerId', 'shared', 'note', 'addedBy', 'addedByName'];
+const SNAPSHOT = ['name', 'nameKey', 'catalogId', 'category', 'location', 'mode', 'unit', 'noun', 'level', 'expiry', 'dateType', 'ownerId', 'shared', 'note', 'brand', 'calories', 'addedBy', 'addedByName'];
 const snapshot = (b) => Object.fromEntries(SNAPSHOT.map((k) => [k, b[k] === undefined ? null : b[k]]));
 
 // One Recently removed record (kitchens/{id}/removed): enough to put it back.

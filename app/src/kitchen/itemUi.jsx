@@ -130,3 +130,27 @@ export function keepsAbout(days) {
   if (days < 330) return `keeps about ${Math.round(days / 30)} months`;
   return 'keeps about a year';
 }
+
+// Optional extras for an item: brand and calories (kcal per serving).
+// Both can be left empty. value = { brand, calories } as typed text.
+export function ExtraFields({ value, onChange, idPrefix = 'x' }) {
+  const set = (k, v) => onChange({ ...value, [k]: v });
+  return (
+    <div className="form-grid">
+      <div className="field">
+        <label htmlFor={`${idPrefix}-brand`} className="label">Brand <span style={{ fontWeight: 600, color: 'var(--muted)' }}>(optional)</span></label>
+        <input id={`${idPrefix}-brand`} className="input" type="text" maxLength={60} autoComplete="off" style={{ height: 52 }}
+          placeholder="e.g. Olper's" value={value.brand || ''} onChange={(e) => set('brand', e.target.value)} />
+      </div>
+      <div className="field">
+        <label htmlFor={`${idPrefix}-cal`} className="label">Calories <span style={{ fontWeight: 600, color: 'var(--muted)' }}>(optional)</span></label>
+        <div style={{ position: 'relative' }}>
+          <input id={`${idPrefix}-cal`} className="input" type="text" inputMode="numeric" autoComplete="off" style={{ height: 52, paddingRight: 112 }}
+            placeholder="e.g. 120" aria-describedby={`${idPrefix}-cal-unit`} value={value.calories ?? ''}
+            onChange={(e) => set('calories', e.target.value.replace(/[^0-9]/g, '').slice(0, 5))} />
+          <span id={`${idPrefix}-cal-unit`} style={{ position: 'absolute', right: 16, top: 16, fontSize: 14, fontWeight: 700, color: 'var(--muted)', pointerEvents: 'none' }}>kcal / serving</span>
+        </div>
+      </div>
+    </div>
+  );
+}

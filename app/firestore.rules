@@ -73,7 +73,7 @@ service cloud.firestore {
     // app fills the rest. The owner must be a member of the kitchen (F27).
     function validItem(kitchenId, d) {
       return d.keys().hasOnly(['name', 'nameKey', 'catalogId', 'category', 'location', 'mode', 'amount', 'unit', 'noun',
-                               'level', 'expiry', 'dateType', 'ownerId', 'shared', 'note', 'addedBy', 'addedByName',
+                               'level', 'expiry', 'dateType', 'ownerId', 'shared', 'note', 'brand', 'calories', 'addedBy', 'addedByName',
                                'addedAt', 'updatedAt', 'updatedBy'])
         && d.name is string && d.name.size() >= 1 && d.name.size() <= 60
         && d.location is string && d.location.size() >= 1 && d.location.size() <= 24
@@ -85,6 +85,9 @@ service cloud.firestore {
         && d.ownerId in kitchen(kitchenId).memberIds
         && d.shared is bool
         && (!('note' in d) || (d.note is string && d.note.size() <= 200))
+        // Optional: brand (short text) and calories (kcal per serving).
+        && (!('brand' in d) || d.brand == null || (d.brand is string && d.brand.size() <= 60))
+        && (!('calories' in d) || d.calories == null || (d.calories is int && d.calories >= 0 && d.calories <= 10000))
         && d.addedBy is string;
     }
 

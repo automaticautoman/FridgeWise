@@ -10,6 +10,7 @@ import crypto from 'node:crypto';
 import { adminAuth } from './admin.js';
 import { getStore } from './store.js';
 import { sendOtpEmail } from './mailer.js';
+import { requireUser } from './auth.js';
 import { isEmail, isStrongEnough } from '../../src/lib/passwordRules.js';
 
 const MINUTE = 60 * 1000;
@@ -147,4 +148,85 @@ export async function resetPassword({ email, resetToken, password }) {
   await auth.updateUser(user.uid, { password });
   await auth.revokeRefreshTokens(user.uid); // other devices must sign in again
   return { status: 200, body: { ok: true } };
+}
+
+// ---------------------------------------------------------------------------
+// Sign-up email verification with a 6-digit code.
+//
+// The person is already signed in (their account was just created), so the
+// email comes from their Firebase ID token, not from the request body. That
+// means nobody can trigger codes for someone else's address. A correct code
+// marks the account as verified in Firebase Auth (emailVerified = true).
+// Uses the same limits and hashed storage as reset codes, under its own keys.
+const verifyKeyFor = (email) => hmac('verify-key', email);
+
+export async function sendSignupCode(_body, { ip, headers } = {}) {
+  const token = await requireUser(headers);
+  const e = normalize(token.email);
+  if (!isEmail(e)) return fail(400, 'otp/invalid-email');
+  if (token.email_verified) return { status: 200, body: { ok: true, alreadyVerified: true } };
+  const now = Date.now();
+  if (!ipAllowed(ip, now)) return fail(429, 'otp/too-many-requests');
+
+  const code = String(crypto.randomInt(0, 1000000)).padStart(6, '0');
+  const wait = await getStore().update(verifyKeyFor(e), (cur) => {
+    const sends = ((cur && cur.sends) || []).filter((t) => now - t < HOUR);
+    const last = sends[sends.length - 1];
+    if (last && now - last < RESEND_COOLDOWN) return { result: Math.ceil((RESEND_COOLDOWN - (now - last)) / 1000) };
+    if (sends.length >= MAX_SENDS_PER_HOUR) return { result: Math.ceil((HOUR - (now - sends[0])) / 1000) };
+    return {
+      next: {
+        sends: [...sends, now],
+        codeHash: hmac('verify-code', e, code),
+        codeExpiresAt: now + CODE_MINUTES * MINUTE,
+        attempts: 0,
+        expireAt: new Date(now + HOUR)
+      },
+      result: 0
+    };
+  });
+  if (wait) {
+    devLog(`sign-up code for ${e} not sent: one was sent ${wait}s ago.`);
+    return fail(429, 'otp/too-soon', { retryAfter: wait });
+  }
+
+  try { await sendOtpEmail(e, code, CODE_MINUTES, 'verify'); } catch (err) {
+    console.error('[otp] email failed:', err.message);
+    await getStore().update(verifyKeyFor(e), (cur) => cur
+      ? { next: { ...cur, sends: (cur.sends || []).filter((t) => t !== now), codeHash: null }, result: null }
+      : { result: null });
+    return fail(502, 'otp/send-failed');
+  }
+  return { status: 200, body: { ok: true, resendAfter: RESEND_COOLDOWN / 1000, expiresInMinutes: CODE_MINUTES } };
+}
+
+export async function checkSignupCode({ code }, { headers } = {}) {
+  const token = await requireUser(headers);
+  const e = normalize(token.email);
+  if (token.email_verified) return { status: 200, body: { ok: true } };
+  const c = String(code || '').replace(/\D/g, '');
+  if (!isEmail(e) || c.length !== 6) return fail(400, 'otp/invalid-code');
+  const now = Date.now();
+
+  const outcome = await getStore().update(verifyKeyFor(e), (cur) => {
+    if (!cur) return { result: 'otp/invalid-code' };
+    if (cur.attempts >= MAX_ATTEMPTS) return { result: 'otp/too-many-attempts' };
+    const good = cur.codeHash && now <= cur.codeExpiresAt && sameHash(cur.codeHash, hmac('verify-code', e, c));
+    if (!good) {
+      const attempts = cur.attempts + 1;
+      return { next: { ...cur, attempts }, result: attempts >= MAX_ATTEMPTS ? 'otp/too-many-attempts' : 'otp/invalid-code' };
+    }
+    return { next: null, result: 'ok' }; // used up: delete the record
+  });
+  if (outcome !== 'ok') return fail(400, outcome);
+
+  await adminAuth().updateUser(token.uid, { emailVerified: true });
+  return { status: 200, body: { ok: true } };
+}
+
+// One Vercel function for both steps (the free plan allows 12 functions).
+export function signupCodeStep(body, ctx) {
+  if (body && body.action === 'send') return sendSignupCode(body, ctx);
+  if (body && body.action === 'check') return checkSignupCode(body, ctx);
+  return Promise.resolve(fail(400, 'otp/bad-request'));
 }

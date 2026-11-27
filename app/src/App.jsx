@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuth } from './auth/AuthProvider';
+import { needsEmailCode } from './auth/authService';
+import VerifyEmail from './pages/VerifyEmail';
 import { OfflineBar } from './components/ui';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
@@ -26,7 +28,7 @@ function needsOnboarding(profile) {
 function PublicOnly({ children }) {
   const { user, profile, loading } = useAuth();
   if (loading) return <Splash />;
-  if (user) return <Navigate to={needsOnboarding(profile) ? '/onboarding' : '/home'} replace />;
+  if (user) return <Navigate to={needsEmailCode(user) ? '/verify-email' : needsOnboarding(profile) ? '/onboarding' : '/home'} replace />;
   return children;
 }
 
@@ -36,6 +38,7 @@ function Private({ children, onboarding = false }) {
   const location = useLocation();
   if (loading) return <Splash />;
   if (!user) return <Navigate to="/signin" replace state={{ from: location.pathname }} />;
+  if (needsEmailCode(user)) return <Navigate to="/verify-email" replace />;
   if (!onboarding && needsOnboarding(profile)) return <Navigate to="/onboarding" replace />;
   if (onboarding && !needsOnboarding(profile)) return <Navigate to="/home" replace />;
   return children;
@@ -65,6 +68,7 @@ export default function App() {
         <Route path="/auth/action" element={<Navigate to="/forgot-password" replace />} />
         <Route path="/reset-done" element={<ResetDone />} />
 
+        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/onboarding" element={<Private onboarding><Onboarding /></Private>} />
         <Route path="/home" element={<Private><Home /></Private>} />
         <Route path="/settings" element={<Private><Settings /></Private>} />

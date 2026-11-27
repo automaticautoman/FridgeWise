@@ -17,6 +17,7 @@ Everything runs on Firebase's **free Spark plan** and Vercel's free Hobby plan. 
 ## What each feature does
 
 - **F01 Sign up:** name, email and password, or Google. Password rules: 8+ characters, a letter and a number, with live checks. A profile is saved in `users/{uid}`.
+- **Confirm email (sign-up code):** email-and-password accounts get a 6-digit code by email and must enter it on `/verify-email` before using the app. `api/otp/email.js` sends and checks it with the user's ID token, then marks the account verified in Firebase Auth. Google accounts are already verified and skip this. Both code emails (sign-up and reset) use the same design in `api/_lib/emailTemplate.js`; edit `TEAM` there to change the names in the footer. Previews: `email-previews/` in the repo root.
 - **F02 Sign in and stay signed in:** email/password or Google. The session survives reloads, restarts and going offline (an offline bar shows). Wrong details get one message that never says which field was wrong, so it doesn't reveal whether an email has an account.
 - **F03 Forgot password:** emails a **6-digit code**. Enter it on the "Check your email" screen, then **Set a new password**, then **Password updated**. How it's kept safe:
   - The screen and the server reply are the same whether or not the email has an account.

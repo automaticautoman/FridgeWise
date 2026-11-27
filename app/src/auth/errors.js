@@ -43,6 +43,8 @@ export function friendlyError(err, context = 'general') {
       return 'This reset took too long. Start again to get a new code.';
     case 'otp/weak-password':
       return 'Pick a stronger password: 8+ characters with a letter and a number.';
+    case 'otp/bad-request':
+      return 'Something went wrong. Please try again.';
     case 'otp/send-failed':
       return "We couldn't send the email just now. Please try again in a minute.";
     // Kitchens (api/kitchens.js)

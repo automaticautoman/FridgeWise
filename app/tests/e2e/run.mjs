@@ -37,7 +37,7 @@ async function resetCodeFor(email) {
 }
 
 const server = spawn('npx', ['vite', '--mode', 'emulator-nojava', '--port', PORT, '--strictPort'], {
-  env: { ...process.env, VITE_USE_EMULATORS: 'true', E2E_FAKE_FIRESTORE: 'true', OTP_STORE: 'memory', OTP_DEV_OUTBOX: 'true', FIREBASE_AUTH_EMULATOR_HOST: '127.0.0.1:9099' },
+  env: { ...process.env, VITE_USE_EMULATORS: 'true', E2E_FAKE_FIRESTORE: 'true', OTP_STORE: 'memory', OTP_DEV_OUTBOX: 'true', SMTP_HOST: '', FIREBASE_AUTH_EMULATOR_HOST: '127.0.0.1:9099' },
   stdio: 'ignore',
   shell: process.platform === 'win32'
 });
@@ -75,8 +75,20 @@ try {
     await page.fill('#password', 'chaiTime2026');
     check('F01 strong password enables Create account', await page.isEnabled('button:has-text("Create account")'));
     await page.click('button:has-text("Create account")');
+    await atPath('/verify-email');
+    check('F01 sign up asks to confirm the email with a code', true);
+    await shot('02b-confirm-email');
+    // Codes from the dev outbox are the same for reset and sign-up.
+    let signupCode = null;
+    for (let i = 0; i < 20 && !signupCode; i++) { signupCode = await resetCodeFor('sara@example.com'); if (!signupCode) await new Promise((r) => setTimeout(r, 250)); }
+    await page.fill('#code', '000000');
+    await page.click('button:has-text("Confirm email")');
+    await page.waitForSelector('#verify-error');
+    check('F01 wrong sign-up code is refused', true);
+    await page.fill('#code', signupCode);
+    await page.click('button:has-text("Confirm email")');
     await atPath('/onboarding');
-    check('F01 sign up creates account and opens onboarding', true);
+    check('F01 right code confirms the email and opens onboarding', true);
   });
 
   // F05 onboarding.

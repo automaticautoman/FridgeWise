@@ -3,26 +3,17 @@
 // With no SMTP_HOST in emulator mode, the code is printed to the server log
 // and kept in a dev-only outbox instead of being emailed.
 import nodemailer from 'nodemailer';
+import { renderCodeEmail } from './emailTemplate.js';
 
 const outbox = globalThis.__fwOtpOutbox || (globalThis.__fwOtpOutbox = []);
 export const devOutbox = () => outbox;
 
 let transport;
 
-function html(code, minutes) {
-  return `<!doctype html><html><body style="margin:0;background:#FFF9F0;font-family:Nunito,Arial,sans-serif;color:#3D3533">
-  <div style="max-width:440px;margin:0 auto;padding:32px 24px">
-    <div style="font-size:24px;font-weight:800">FridgeWise</div>
-    <p style="font-size:16px;line-height:1.5;margin:24px 0 8px">Here's your code to set a new password:</p>
-    <div style="font-size:36px;font-weight:800;letter-spacing:8px;background:#fff;border-radius:16px;padding:16px;text-align:center">${code}</div>
-    <p style="font-size:14px;line-height:1.5;color:#6B6663;margin:16px 0 0">It works for ${minutes} minutes. If you didn't ask for this, you can ignore this email. Your password won't change.</p>
-  </div></body></html>`;
-}
-
-export async function sendOtpEmail(to, code, minutes) {
+export async function sendOtpEmail(to, code, minutes, purpose = 'reset') {
   if (!process.env.SMTP_HOST) {
     if (!process.env.FIREBASE_AUTH_EMULATOR_HOST) throw new Error('SMTP_HOST is not set');
-    console.log(`[otp] dev mode, not emailed. Code for ${to}: ${code}`);
+    console.log(`[otp] dev mode, not emailed. ${purpose === 'verify' ? 'Sign-up' : 'Reset'} code for ${to}: ${code}`);
     outbox.push({ to, code, at: Date.now() });
     if (outbox.length > 50) outbox.shift();
     return;
@@ -30,9 +21,7 @@ export async function sendOtpEmail(to, code, minutes) {
   const info = await getTransport().sendMail({
     from: mailFrom(),
     to,
-    subject: `${code} is your FridgeWise reset code`,
-    text: `Your FridgeWise code to set a new password is ${code}. It works for ${minutes} minutes. If you didn't ask for this, ignore this email.`,
-    html: html(code, minutes)
+    ...renderCodeEmail({ code, minutes, purpose })
   });
   if (!process.env.VERCEL) console.log(`[otp] emailed a code to ${to} via ${process.env.SMTP_HOST} (${info.response || info.messageId})`);
 }

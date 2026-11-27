@@ -91,6 +91,48 @@ export function finishPasswordReset(email, resetToken, password) {
   return otpApi('reset', { email, resetToken, password });
 }
 
+// Sign-up email verification (api/otp/email.js). The server reads the email
+// from the signed-in user's ID token, so only the account owner can use it.
+async function signupCodeApi(body) {
+  const user = auth.currentUser;
+  if (!user) { const err = new Error('auth/not-signed-in'); err.code = 'auth/not-signed-in'; throw err; }
+  let res;
+  try {
+    res = await fetch('/api/otp/email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + await user.getIdToken() },
+      body: JSON.stringify(body)
+    });
+  } catch {
+    const err = new Error('offline'); err.code = 'auth/network-request-failed'; throw err;
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.error || 'otp/server-error');
+    err.code = data.error || 'otp/server-error';
+    err.retryAfter = data.retryAfter;
+    throw err;
+  }
+  return data;
+}
+
+export function sendSignupCode() {
+  return signupCodeApi({ action: 'send' });
+}
+
+// On success the account is marked verified; reload so the app sees it.
+export async function checkSignupCode(code) {
+  await signupCodeApi({ action: 'check', code });
+  await auth.currentUser.reload();
+  await auth.currentUser.getIdToken(true);
+}
+
+// Email-and-password accounts must confirm their email with a code before
+// using the app. Google accounts come verified by Google.
+export function needsEmailCode(user) {
+  return !!user && !user.emailVerified && hasPasswordProvider(user);
+}
+
 export function hasPasswordProvider(user) {
   return !!user && user.providerData.some((p) => p.providerId === 'password');
 }
